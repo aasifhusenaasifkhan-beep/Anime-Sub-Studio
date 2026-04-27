@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Anime Sub Studio | Watch Online</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="logo">ANIME <span>SUB STUDIO</span></a>
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search Anime, K-Drama...">
+    </div>
+</header>
+
+<div class="main-layout">
+    <aside class="sidebar">
+        <div class="side-box">
+            <div class="box-title">Categories</div>
+            <button class="cat-btn active" onclick="filterType('All')">All Updates</button>
+            <button class="cat-btn" onclick="filterType('Anime Hindi Sub')">Anime Hindi Sub</button>
+            <button class="cat-btn" onclick="filterType('Anime Hindi Dub')">Anime Hindi Dub</button>
+            <button class="cat-btn" onclick="filterType('K-Drama')">K-Dramas</button>
+            <button class="cat-btn" onclick="filterType('Movies')">Movies</button>
+            <button class="cat-btn" onclick="filterType('Series')">Web Series</button>
+        </div>
+
+        <div class="side-box">
+            <div class="box-title">A-Z Directory</div>
+            <div class="az-grid" id="azMenu">
+                <button class="az-btn active" onclick="filterAZ('All')">All</button>
+                <button class="az-btn" onclick="filterAZ('0-9')">0-9</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="content">
+        <div class="anime-grid" id="mainGrid">
+            <!-- Data will load here -->
+        </div>
+    </main>
+</div>
+
+<div class="footer-social">
+    <a href="https://t.me/yourchannel" class="social-icon" style="background:#0088cc;"><i class="fab fa-telegram-plane"></i></a>
+    <a href="https://t.me/yourgroup" class="social-icon" style="background:#222;"><i class="fas fa-comments"></i></a>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+    const firebaseConfig = { /* APNA FIREBASE CONFIG DAALEIN */ };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let masterData = [];
+
+    // A-Z Buttons Generate
+    const azMenu = document.getElementById('azMenu');
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
+        azMenu.innerHTML += `<button class="az-btn" onclick="filterAZ('${l}')">${l}</button>`;
+    });
+
+    async function loadData() {
+        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        masterData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        render(masterData);
+    }
+
+    function render(list) {
+        const grid = document.getElementById('mainGrid');
+        grid.innerHTML = list.map(a => `
+            <div class="anime-card" onclick="location.href='detail.html?id=${a.id}'">
+                <div class="badge">${a.type}</div>
+                <img src="${a.image}" alt="${a.name}">
+                <div class="anime-info">
+                    <h3>${a.name}</h3>
+                    <small style="color:#666">${a.genre}</small>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.filterType = (t) => {
+        if(t === 'All') render(masterData);
+        else render(masterData.filter(a => a.type === t));
+    };
+
+    window.filterAZ = (l) => {
+        if(l === 'All') render(masterData);
+        else if(l === '0-9') render(masterData.filter(a => /^\d/.test(a.name)));
+        else render(masterData.filter(a => a.name.toUpperCase().startsWith(l)));
+    };
+
+    document.getElementById('searchInput').oninput = (e) => {
+        const val = e.target.value.toLowerCase();
+        render(masterData.filter(a => a.name.toLowerCase().includes(val)));
+    };
+
+    loadData();
+</script>
+</body>
+</html>
