@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Online | Anime Sub Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="logo">ANIME <span>SUB STUDIO</span></a>
+</header>
+
+<div class="container" style="max-width: 1100px; margin: auto; padding: 20px;">
+    
+    <!-- Professional Video Player Section -->
+    <div class="player-wrapper">
+        <iframe id="mainPlayer" src="" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+
+    <!-- Anime Info Section -->
+    <div style="display:flex; gap:25px; margin-top:30px; flex-wrap: wrap;">
+        <img id="pImg" style="width:220px; border-radius:15px; border:1px solid var(--border); box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+        <div style="flex:1; min-width:300px;">
+            <h1 id="pName" style="margin:0; font-size:32px; font-weight:800; color:var(--primary);">Loading...</h1>
+            <div id="pMeta" style="margin:10px 0; color:var(--text-dim); font-size:14px; display:flex; gap:15px;">
+                <!-- Genre and Date will appear here -->
+            </div>
+            <p id="pStory" style="color:#cbd5e1; line-height:1.8; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid var(--border);"></p>
+        </div>
+    </div>
+
+    <!-- Episode Selection Section -->
+    <div class="widget" style="margin-top:40px;">
+        <div class="widget-title"><i class="fas fa-play-circle"></i> Select Episode</div>
+        <div id="epGrid" class="ep-selector">
+            <!-- Episodes will load here -->
+        </div>
+    </div>
+
+    <!-- Advanced Earning & Premium Section -->
+    <div class="premium-shield">
+        <h2 style="color:var(--primary); margin:0 0 10px 0;"><i class="fas fa-crown"></i> Premium Direct Access</h2>
+        <p style="color:var(--text-dim); margin-bottom:20px;">Premium users get <b>Direct Fast Links</b> without any Ads. Normal users will use <b>Shortener</b>.</p>
+        
+        <div id="verifyArea" style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+            <input type="text" id="tgInput" placeholder="Enter Registered Telegram ID" style="max-width:350px; text-align:center;">
+            <button class="btn-save" style="width:auto; padding:12px 30px;" onclick="checkAccess()">Verify & Unlock Link</button>
+        </div>
+
+        <!-- Download Buttons will appear here -->
+        <div id="dlActionArea" style="margin-top:25px; min-height:50px;"></div>
+    </div>
+
+</div>
+
+<!-- Footer Social -->
+<div class="footer-social">
+    <a href="https://t.me/your_channel" target="_blank" class="social-icon" style="background:#0088cc;"><i class="fab fa-telegram-plane"></i></a>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+    // 🔥 PASTE YOUR FIREBASE CONFIG HERE
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlId = new URLSearchParams(window.location.search).get('id');
+    let animeData = null;
+    let selectedEpData = null;
+
+    // 1. Load Anime Details
+    async function loadPage() {
+        if(!urlId) return;
+        const snap = await getDoc(doc(db, "content", urlId));
+        if(snap.exists()) {
+            animeData = snap.data();
+            document.getElementById('pName').innerText = animeData.name;
+            document.getElementById('pImg').src = animeData.image;
+            document.getElementById('pStory').innerText = animeData.story;
+            document.getElementById('pMeta').innerHTML = `
+                <span><i class="fas fa-tags"></i> ${animeData.genre}</span>
+                <span><i class="fas fa-calendar-alt"></i> ${animeData.date}</span>
+                <span style="color:var(--primary)"><i class="fas fa-video"></i> ${animeData.type}</span>
+            `;
+            loadEpisodes();
+        }
+    }
+
+    // 2. Load Episodes from Sub-Collection
+    async function loadEpisodes() {
+        const q = query(collection(db, "episodes"), where("postId", "==", urlId));
+        const snap = await getDocs(q);
+        const eps = snap.docs.map(d => d.data()).sort((a,b) => a.num - b.num);
+        
+        const grid = document.getElementById('epGrid');
+        if(eps.length === 0) {
+            grid.innerHTML = `<p style="color:var(--text-dim)">Episodes coming soon...</p>`;
+            return;
+        }
+
+        grid.innerHTML = eps.map(e => `
+            <div class="ep-node" onclick="playVideo('${e.stream}', '${e.download}', ${e.num})">
+                Episode ${e.num}
+            </div>
+        `).join('');
+
+        // Auto-play first episode
+        playVideo(eps[0].stream, eps[0].download, eps[0].num);
+    }
+
+    // 3. Play Function
+    window.playVideo = (stream, download, num) => {
+        document.getElementById('mainPlayer').src = stream;
+        selectedEpData = { stream, download, num };
+        document.getElementById('dlActionArea').innerHTML = ''; // Reset download area
+        
+        // Highlight active episode
+        document.querySelectorAll('.ep-node').forEach(node => {
+            if(node.innerText.includes(num)) node.style.borderColor = "var(--primary)";
+            else node.style.borderColor = "var(--border)";
+        });
+    };
+
+    // 4. Premium & Shortener Earning Logic
+    window.checkAccess = async () => {
+        if(!selectedEpData) return alert("Please select an episode first!");
+        
+        const tgId = document.getElementById('tgInput').value.trim();
+        const actionArea = document.getElementById('dlActionArea');
+        actionArea.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Checking Access...`;
+
+        if(tgId === "") {
+            generateShortLink(actionArea);
+            return;
+        }
+
+        // Check in Premium Database
+        const q = query(collection(db, "premium"), where("tgId", "==", tgId));
+        const snap = await getDocs(q);
+
+        if(!snap.empty) {
+            const userData = snap.docs[0].data();
+            if(userData.expiry > Date.now()) {
+                // ✅ PREMIUM USER: Show Direct Link
+                actionArea.innerHTML = `
+                    <div style="background:rgba(34, 197, 94, 0.1); padding:15px; border-radius:10px; border:1px solid var(--success);">
+                        <p style="color:var(--success); font-weight:bold; margin-bottom:10px;">✅ Premium ID Verified!</p>
+                        <a href="${selectedEpData.download}" target="_blank" class="btn-save" style="background:var(--success); text-decoration:none;">
+                            <i class="fas fa-download"></i> Direct Download (Episode ${selectedEpData.num})
+                        </a>
+                    </div>
+                `;
+            } else {
+                alert("Subscription Expired! Redirecting to Free Download...");
+                generateShortLink(actionArea);
+            }
+        } else {
+            // ❌ NOT PREMIUM: Show Shortener Link
+            generateShortLink(actionArea);
+        }
+    };
+
+    // 5. Shortener Rotation Logic
+    async function generateShortLink(container) {
+        const setSnap = await getDoc(doc(db, "settings", "shorteners"));
+        if(setSnap.exists()) {
+            const shorteners = setSnap.data().list;
+            if(shorteners && shorteners.length > 0) {
+                // Randomly pick one of the 3 accounts
+                const rand = shorteners[Math.floor(Math.random() * shorteners.length)];
+                const finalUrl = `${rand.u}?api=${rand.k}&url=${encodeURIComponent(selectedEpData.download)}`;
+                
+                container.innerHTML = `
+                    <p style="color:var(--text-dim); margin-bottom:10px;">Free Link generated (Contains Ads)</p>
+                    <a href="${finalUrl}" target="_blank" class="btn-save" style="text-decoration:none;">
+                        <i class="fas fa-ad"></i> Free Download (Episode ${selectedEpData.num})
+                    </a>
+                `;
+            } else {
+                container.innerHTML = `<p style="color:red;">Error: Shortener not configured in Admin!</p>`;
+            }
+        }
+    }
+
+    loadPage();
+</script>
+</body>
+</html>
