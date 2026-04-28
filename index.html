@@ -3,18 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Sub Studio | Watch & Share</title>
-    <meta name="description" content="Your hub for anime, short videos, and community content. Join Telegram for updates.">
+    <title>Anime Sub Studio | Watch Hindi Subbed Anime & More</title>
+    <meta name="description" content="Anime Sub Studio - Watch Hindi Subbed & Dubbed Anime, K-Dramas, Movies & Web Series for free. High quality streaming and fast updates.">
+    <meta name="keywords" content="anime hindi sub, anime hindi dub, korean drama hindi, hindi subbed anime, anime sub studio, free anime streaming, हिंदी एनीमे">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://animesubstudio-256ec.web.app/">
+    <meta property="og:title" content="Anime Sub Studio | Watch Hindi Subbed Anime & K-Dramas">
+    <meta property="og:description" content="Your hub for Hindi Subbed & Dubbed Anime, K-Dramas, Movies & Web Series.">
+    <meta property="og:url" content="https://animesubstudio-256ec.web.app/">
+    <meta property="og:type" content="website">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Anime Sub Studio",
+        "url": "https://animesubstudio-256ec.web.app/",
+        "description": "Best site for Hindi Subbed Anime, K-Dramas, Movies & Web Series.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://animesubstudio-256ec.web.app/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
 <header>
     <a href="index.html" class="logo">ANIME <span>SUB STUDIO</span></a>
     <div class="search-box">
         <i class="fas fa-search"></i>
-        <input type="text" id="mainSearch" placeholder="Search by Name or Genre...">
+        <input type="text" id="mainSearch" placeholder="Search anime, drama, movies...">
     </div>
 </header>
 
@@ -22,7 +42,7 @@
     <aside class="sidebar">
         <div class="widget">
             <div class="widget-title">Categories</div>
-            <div class="cat-list" id="catList">
+            <div id="catList">
                 <button class="cat-btn active" onclick="filterData('All', this)">All Updates</button>
                 <button class="cat-btn" onclick="filterData('Short Video', this)">Short Videos</button>
                 <button class="cat-btn" onclick="filterData('Anime', this)">Anime</button>
@@ -45,8 +65,8 @@
 </div>
 
 <div class="social-footer">
-    <a href="https://t.me/YOUR_CHANNEL" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Join Channel</a>
-    <a href="https://t.me/YOUR_GROUP" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Discussion</a>
+    <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Join Channel</a>
+    <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Discussion</a>
 </div>
 
 <script type="module">
@@ -61,12 +81,10 @@
         messagingSenderId: "439418566080",
         appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     let allData = [];
 
-    // Build A-Z buttons
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
         document.getElementById('azGrid').innerHTML += `<button class="az-btn" onclick="filterLetter('${l}', this)">${l}</button>`;
     });
@@ -80,16 +98,16 @@
     window.render = (list) => {
         const grid = document.getElementById('gridDisplay');
         if(list.length === 0) {
-            grid.innerHTML = "<p style='color:var(--text-dim); text-align:center; padding:30px;'>No Content Found!</p>";
+            grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-light);">No Content Found! Admin, add posts from the Admin Panel.</p>';
             return;
         }
         grid.innerHTML = list.map(a => `
             <div class="anime-card" onclick="location.href='detail.html?id=${a.id}'">
                 <div class="type-tag">${a.type}</div>
-                <img src="${a.image}" loading="lazy" alt="${a.name}">
+                <img src="${a.image}" alt="${a.name}" loading="lazy">
                 <div class="card-details">
                     <h3>${a.name}</h3>
-                    <div style="font-size:11px; color:var(--primary); margin-top:5px;">${a.genre}</div>
+                    <div style="font-size:0.8rem; color:var(--accent); margin-top:0.25rem;">${a.genre}</div>
                 </div>
             </div>
         `).join('');
