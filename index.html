@@ -2,71 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ASI Anime - Watch Hindi Subbed & Dubbed Anime, K-Drama</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Sub Studio | Watch Anime, K-Drama & Movies</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-    <!-- A-Z DIRECTORY SIDEBAR -->
-    <div id="sidebar" class="sidebar">
-        <button class="close-btn" onclick="closeNav()">&times;</button>
-        <div class="sidebar-content">
-            <h3 style="color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px;"><i class="fas fa-book"></i> A-Z Directory</h3>
-            <div id="all-anime-list-menu">
-                <a href="javascript:void(0)" onclick="showAzList('Anime Sub')">Anime (Sub)</a>
-                <a href="javascript:void(0)" onclick="showAzList('Anime Dub')">Anime (Dub)</a>
-                <a href="javascript:void(0)" onclick="showAzList('K-Drama')">K-Dramas</a>
-                <a href="javascript:void(0)" onclick="showAzList('Movie')">Movies</a>
-                <a href="javascript:void(0)" onclick="showAzList('Series')">Web Series</a>
+<header>
+    <a href="index.html" class="logo">ANIME <span>SUB STUDIO</span></a>
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="mainSearch" placeholder="Deep Search by Name or Genre...">
+    </div>
+</header>
+
+<div class="master-layout">
+    <aside class="sidebar">
+        <div class="widget">
+            <div class="widget-title">Categories</div>
+            <div class="cat-list" id="catList">
+                <button class="cat-btn active" onclick="filterData('All', this)">All Updates</button>
+                <button class="cat-btn" onclick="filterData('Anime Hindi Sub', this)">Anime Hindi Sub</button>
+                <button class="cat-btn" onclick="filterData('Anime Hindi Dub', this)">Anime Hindi Dub</button>
+                <button class="cat-btn" onclick="filterData('K-Drama', this)">K-Dramas</button>
+                <button class="cat-btn" onclick="filterData('Movie', this)">Movies</button>
+                <button class="cat-btn" onclick="filterData('Series', this)">Web Series</button>
             </div>
         </div>
-    </div>
-    <div id="overlay" onclick="closeNav()"></div>
 
-    <!-- HEADER -->
-    <header>
-        <div class="header-left">
-            <span class="menu-icon" onclick="openNav()"><i class="fas fa-bars"></i></span>
-            <a href="index.html" class="logo">ASI <span>Studio</span></a>
+        <div class="widget">
+            <div class="widget-title">A-Z Directory</div>
+            <div class="az-grid" id="azGrid">
+                <button class="az-btn active" onclick="filterLetter('All', this)">ALL</button>
+                <button class="az-btn" onclick="filterLetter('0-9', this)">0-9</button>
+            </div>
         </div>
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input id="searchInput" placeholder="Search Anime, K-Drama, Movies...">
-        </div>
-    </header>
+    </aside>
 
-    <!-- FILTERS -->
-    <div class="filter-container" id="mainFilters">
-        <button onclick="setType('all', this)" class="active">All</button>
-        <button onclick="setType('Anime Sub', this)">Anime (Sub)</button>
-        <button onclick="setType('Anime Dub', this)">Anime (Dub)</button>
-        <button onclick="setType('K-Drama', this)">K-Dramas</button>
-        <button onclick="setType('Movie', this)">Movies</button>
-        <button onclick="setType('Series', this)">Web Series</button>
-    </div>
+    <main class="main-view">
+        <div class="anime-grid" id="gridDisplay"></div>
+    </main>
+</div>
 
-    <!-- MAIN GRID -->
-    <main id="animeList" class="anime-list"></main>
-
-    <!-- A-Z LIST VIEW -->
-    <div id="azListView" class="az-list-view" style="display: none;">
-        <button onclick="showHome()" style="padding:10px; margin-bottom:15px; cursor:pointer;">Back to Home</button>
-        <h2 id="azListTitle" style="color: var(--primary);"></h2>
-        <div id="az-alphabet-box" class="az-alphabet-box"></div>
-        <div id="az-results" style="padding:20px; background:#111; border-radius:10px;"></div>
-    </div>
-
-    <!-- FOOTER LINKS (ORIGINAL) -->
-    <div class="social-footer">
-        <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
-        <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
-    </div>
+<div class="social-footer">
+    <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
+    <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Discussion Group</a>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
     const firebaseConfig = { 
         apiKey: "AIzaSyBhDMFJS5CuQN5H8T_FuSWzz8xau2qSv0I",
@@ -79,91 +65,52 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    let allData = [];
 
-    let allAnime = [];
-    let currentType = "all";
-    let currentSearch = "";
-
-    window.openNav = () => { document.getElementById("sidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; };
-    window.closeNav = () => { document.getElementById("sidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; };
-    
-    window.showHome = () => {
-        document.getElementById("animeList").style.display = "grid";
-        document.getElementById("mainFilters").style.display = "flex";
-        document.getElementById("azListView").style.display = "none";
-        applyFilter();
-    };
-
-    async function loadAnime() {
-        const snap = await getDocs(collection(db, "anime"));
-        allAnime = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.updatedAt - a.updatedAt);
-        applyFilter();
-    }
-    
-    function applyFilter() {
-        let filtered = allAnime.filter(a => {
-            const nameMatch = (a.name || "").toLowerCase().includes(currentSearch.toLowerCase());
-            const typeMatch = currentType === "all" || (a.type || "") === currentType;
-            return nameMatch && typeMatch;
-        });
-        render(filtered);
-    }
-
-    function render(list) {
-        let box = document.getElementById("animeList");
-        box.innerHTML = list.map(a => {
-            let badgeClass = "badge-sub";
-            if(a.type.includes("Dub")) badgeClass = "badge-dub";
-            else if(a.type.includes("Drama")) badgeClass = "badge-kdrama";
-            
-            return `
-            <div class="anime-card" onclick="location.href='detail.html?id=${a.id}'">
-                <div class="badge-type ${badgeClass}">${a.type}</div>
-                <img src="${a.image}">
-                <div class="anime-info">
-                    <h4>${a.name}</h4>
-                    <span style="font-size:12px; color:#aaa;">${a.genre}</span>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    window.setType = (type, btn) => {
-        currentType = type;
-        document.querySelectorAll(".filter-container button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        applyFilter();
-    };
-
-    document.getElementById("searchInput").addEventListener("input", e => {
-        currentSearch = e.target.value.trim();
-        applyFilter(); 
+    const az = document.getElementById('azGrid');
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
+        az.innerHTML += `<button class="az-btn" onclick="filterLetter('${l}', this)">${l}</button>`;
     });
 
-    // A-Z Logic
-    window.showAzList = (type) => {
-        closeNav(); 
-        document.getElementById("animeList").style.display = "none";
-        document.getElementById("mainFilters").style.display = "none"; 
-        document.getElementById("azListView").style.display = "block"; 
-        document.getElementById("azListTitle").innerText = type + " Directory";
-        
-        const alphabetBox = document.getElementById("az-alphabet-box");
-        alphabetBox.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').map(l => 
-            `<button onclick="renderAzResults('${type}', '${l}', this)">${l}</button>`
-        ).join('');
-    };
-    
-    window.renderAzResults = (type, letter, btn) => {
-        document.querySelectorAll('#az-alphabet-box button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const results = allAnime.filter(a => a.type === type && a.name.toUpperCase().startsWith(letter));
-        document.getElementById("az-results").innerHTML = results.length > 0 ? 
-            results.map(a => `<a href="detail.html?id=${a.id}" style="color:white; display:block; padding:10px; text-decoration:none;">📺 ${a.name}</a>`).join('') :
-            "<p>No content found.</p>";
+    async function loadData() {
+        const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
+        allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        render(allData);
+    }
+
+    window.render = (list) => {
+        const grid = document.getElementById('gridDisplay');
+        if(list.length === 0) { grid.innerHTML = "<p style='color:var(--text-dim)'>No Content Found!</p>"; return; }
+        grid.innerHTML = list.map(a => `
+            <div class="anime-card" onclick="location.href='detail.html?id=${a.id}'">
+                <div class="type-tag">${a.type}</div>
+                <img src="${a.image}" loading="lazy">
+                <div class="card-details">
+                    <h3>${a.name}</h3>
+                    <div style="font-size:11px; color:var(--primary); margin-top:5px;">${a.genre}</div>
+                </div>
+            </div>
+        `).join('');
     };
 
-    loadAnime();
+    window.filterData = (type, btn) => {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+        render(type === 'All' ? allData : allData.filter(a => a.type === type));
+    };
+
+    window.filterLetter = (l, btn) => {
+        document.querySelectorAll('.az-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+        if(l === 'All') render(allData);
+        else if(l === '0-9') render(allData.filter(a => /^\d/.test(a.name)));
+        else render(allData.filter(a => a.name.toUpperCase().startsWith(l)));
+    };
+
+    document.getElementById('mainSearch').oninput = (e) => {
+        const val = e.target.value.toLowerCase();
+        render(allData.filter(a => a.name.toLowerCase().includes(val) || a.genre.toLowerCase().includes(val)));
+    };
+
+    loadData();
 </script>
 </body>
 </html>
