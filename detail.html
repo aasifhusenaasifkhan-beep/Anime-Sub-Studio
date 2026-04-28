@@ -3,70 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch | Anime Sub Studio</title>
+    <title>Watch Now | Anime Sub Studio</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .locked { filter: blur(20px); pointer-events: none; }
-        .unlock-box { text-align: center; padding: 40px; background: var(--card); border-radius: 15px; border: 1px solid var(--primary); max-width: 500px; margin: 40px auto; }
+        .unlock-box { text-align: center; padding: 3rem; background: var(--card); border-radius: 12px; border: 2px solid var(--accent); max-width: 500px; margin: 3rem auto; box-shadow: var(--shadow); }
+        .unlock-box i { font-size: 3rem; color: var(--accent); margin-bottom: 1rem; }
+        .unlock-box p a { color: #0088cc; }
     </style>
 </head>
 <body>
-
 <header><a href="index.html" class="logo">ANIME <span>SUB STUDIO</span></a></header>
 
 <div class="master-layout" style="flex-direction:column; max-width:1100px; margin:auto;">
 
-    <!-- Poster & Info (always visible) -->
-    <div style="display:flex; gap:25px; flex-wrap:wrap; margin-bottom:20px;">
-        <img id="pImg" style="width:200px; border-radius:12px; border:1px solid var(--border);" alt="Poster">
+    <div style="display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+        <img id="pImg" style="width:200px; border-radius:12px; border:1px solid var(--border); box-shadow: var(--shadow);" alt="Poster">
         <div style="flex:1;">
-            <h1 id="pName" style="margin:0; color:var(--primary); font-size:30px;">Loading...</h1>
-            <p id="pMeta" style="color:var(--text-dim); margin:10px 0; font-weight:bold;"></p>
-            <p id="pStory" style="line-height:1.7; background:var(--card); padding:15px; border-radius:10px; border:1px solid var(--border); color:#ccc;"></p>
+            <h1 id="pName" style="margin:0; color:var(--accent); font-size:2rem;">Loading...</h1>
+            <p id="pMeta" style="color:var(--text-light); margin:0.5rem 0; font-weight:600;"></p>
+            <p id="pStory" style="background:var(--card); padding:1rem; border-radius:8px; border:1px solid var(--border); color:var(--text);"></p>
         </div>
     </div>
 
-    <!-- Password lock area -->
+    <!-- Password Lock -->
     <div id="lockArea" class="unlock-box">
-        <i class="fas fa-lock" style="font-size:40px; color:var(--primary); margin-bottom:15px;"></i>
-        <h2 style="color:white;">🔐 Unlock Video Access</h2>
-        <p style="color:var(--text-dim); margin:10px 0;">
-            <a href="https://t.me/YOUR_GROUP" target="_blank" style="color:#00a8ff; text-decoration:underline;">
-                📢 Join Telegram Group to Get Password
-            </a>
-        </p>
-        <input type="password" id="globalPass" placeholder="Enter Password" style="max-width:300px; margin:0 auto; text-align:center;">
-        <button class="btn-save" onclick="unlockVideo()" style="display:block; margin:10px auto 0;">Unlock Now</button>
-        <p id="msg" style="color:red; font-weight:bold; margin-top:10px;"></p>
+        <i class="fas fa-lock"></i>
+        <h2>Video Locked</h2>
+        <p style="margin:0.5rem 0; color:var(--text-light);">Join our Telegram group to get the password.</p>
+        <p><a href="https://t.me/hindisubanime_q" target="_blank" style="color:#0088cc; font-weight:bold;">📢 @hindisubanime_q</a></p>
+        <input type="password" id="globalPass" placeholder="Enter Password" style="max-width:300px; margin:0 auto; text-align:center; background:white;">
+        <button class="btn-save" onclick="unlockVideo()" style="margin-top:0.5rem;">Unlock Now</button>
+        <p id="msg" style="color:red; font-weight:bold; margin-top:0.5rem;"></p>
     </div>
 
-    <!-- Video + Episodes (hidden until password correct) -->
+    <!-- Video Section (hidden until unlocked) -->
     <div id="videoSection" style="display:none;">
         <div class="player-box">
-            <iframe id="videoPlayer" src="" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+            <iframe id="videoPlayer" src="" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
         </div>
 
-        <div class="widget" style="margin-top:20px;">
-            <div class="widget-title">📺 Select Episode</div>
-            <div id="epGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px;"></div>
+        <div class="widget">
+            <div class="widget-title">📺 Episodes</div>
+            <div id="epGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:0.75rem;"></div>
         </div>
 
         <div class="premium-shield">
-            <h2 style="color:var(--primary); margin:0 0 10px 0;">🚀 Premium / Free Download</h2>
-            <p style="color:var(--text-dim); font-size:13px; margin-bottom:20px;">
-                Enter Premium Token for Ads‑Free Direct Link. Free users use shorteners.
-            </p>
-            <input type="text" id="tokenInput" placeholder="Enter Premium Token" style="max-width:300px; text-align:center;">
-            <button class="btn-save" onclick="checkAccess()" style="width:auto; padding:12px 30px;">Verify & Get Link</button>
-            <div id="dlArea" style="margin-top:20px;"></div>
+            <h3 style="color:var(--accent); margin-bottom:0.5rem;">🔓 Unlock Download Link</h3>
+            <p style="color:var(--text-light); font-size:0.9rem;">Enter your premium token for direct download. Free users will use a shortener.</p>
+            <input type="text" id="tokenInput" placeholder="Premium Token" style="max-width:300px; margin:0.5rem auto; text-align:center; background:white;">
+            <button class="btn-save" onclick="checkAccess()">Get Download Link</button>
+            <div id="dlArea" style="margin-top:1rem;"></div>
         </div>
     </div>
 </div>
 
 <div class="social-footer">
-    <a href="https://t.me/https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Channel</a>
-    <a href="https://t.me/https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
+    <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Channel</a>
+    <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
 </div>
 
 <script type="module">
@@ -81,32 +75,27 @@
         messagingSenderId: "439418566080",
         appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get('id');
     let selectedDownloadLink = null;
 
-    // Password unlock function
     window.unlockVideo = async () => {
-        const userPass = document.getElementById('globalPass').value.trim();
+        const pass = document.getElementById('globalPass').value.trim();
         const msg = document.getElementById('msg');
-        if(!userPass) { msg.innerText = 'Please enter password!'; return; }
-
+        if(!pass) { msg.innerText = 'Enter password!'; return; }
         const snap = await getDoc(doc(db, "settings", "sitePassword"));
-        if(snap.exists() && snap.data().password === userPass) {
+        if(snap.exists() && snap.data().password === pass) {
             sessionStorage.setItem('site_unlocked', 'true');
             document.getElementById('lockArea').style.display = 'none';
             document.getElementById('videoSection').style.display = 'block';
-            msg.innerText = '';
-            loadContent(); // load episodes now
+            loadContent();
         } else {
-            msg.innerText = 'Wrong Password! Join Telegram to get correct password.';
+            msg.innerText = 'Wrong password! Join @hindisubanime_q for the password.';
         }
     };
 
-    // Check if already unlocked in this session
     if(sessionStorage.getItem('site_unlocked') === 'true') {
         document.getElementById('lockArea').style.display = 'none';
         document.getElementById('videoSection').style.display = 'block';
@@ -114,108 +103,71 @@
 
     async function loadContent() {
         if(!postId) return;
-        const postSnap = await getDoc(doc(db, "posts", postId));
-        if(!postSnap.exists()) return;
-        const data = postSnap.data();
-        document.getElementById('pName').innerText = data.name;
-        document.getElementById('pImg').src = data.image;
-        document.getElementById('pStory').innerText = data.story || '';
-        document.getElementById('pMeta').innerText = `${data.genre} | ${data.date || ''} | ${data.type}`;
-
-        const epsSnap = await getDocs(query(collection(db, "episodes"), where("postId", "==", postId)));
-        const episodes = epsSnap.docs.map(d => d.data()).sort((a,b) => parseFloat(a.num) - parseFloat(b.num));
-        const epGrid = document.getElementById('epGrid');
-        epGrid.innerHTML = episodes.map(e => `
+        const snap = await getDoc(doc(db, "posts", postId));
+        if(!snap.exists()) return;
+        const d = snap.data();
+        document.getElementById('pName').innerText = d.name;
+        document.getElementById('pImg').src = d.image;
+        document.getElementById('pStory').innerText = d.story || '';
+        document.getElementById('pMeta').innerText = `${d.genre} | ${d.date || ''} | ${d.type}`;
+        const epSnap = await getDocs(query(collection(db, "episodes"), where("postId", "==", postId)));
+        const eps = epSnap.docs.map(e => e.data()).sort((a,b) => parseFloat(a.num) - parseFloat(b.num));
+        const grid = document.getElementById('epGrid');
+        grid.innerHTML = eps.map(e => `
             <div class="ep-node" onclick="playEpisode('${e.stream}', '${e.download}')">Ep ${e.num}</div>
         `).join('');
-        if(episodes.length > 0) playEpisode(episodes[0].stream, episodes[0].download);
+        if(eps.length > 0) playEpisode(eps[0].stream, eps[0].download);
     }
 
-    window.playEpisode = (streamUrl, downloadUrl) => {
+    window.playEpisode = (streamUrl, dlUrl) => {
         document.getElementById('videoPlayer').src = streamUrl;
-        selectedDownloadLink = downloadUrl;
+        selectedDownloadLink = dlUrl;
         document.getElementById('dlArea').innerHTML = '';
     };
 
-    // Premium / Free download logic
     window.checkAccess = async () => {
         if(!selectedDownloadLink) {
-            document.getElementById('dlArea').innerHTML = '<span style="color:red;">Select an episode first!</span>';
+            document.getElementById('dlArea').innerHTML = '<span style="color:red;">Select an episode first.</span>';
             return;
         }
         const token = document.getElementById('tokenInput').value.trim();
         const area = document.getElementById('dlArea');
         area.innerHTML = 'Checking...';
-
-        // 1. Premium token check
-        if(token !== '') {
-            const tokenSnap = await getDocs(query(collection(db, "premium"), where("token", "==", token)));
-            if(!tokenSnap.empty) {
-                const tokenData = tokenSnap.docs[0].data();
-                const tokenDocId = tokenSnap.docs[0].id;
-                if(tokenData.expiry > Date.now()) {
-                    // Device lock logic
-                    let deviceId = localStorage.getItem('device_id');
-                    if(!deviceId) {
-                        deviceId = "DEV-" + Math.random().toString(36).substr(2, 10);
-                        localStorage.setItem('device_id', deviceId);
-                    }
-                    if(!tokenData.lockedDevice || tokenData.lockedDevice === deviceId) {
-                        if(!tokenData.lockedDevice) {
-                            await setDoc(doc(db, "premium", tokenDocId), { lockedDevice: deviceId }, { merge: true });
-                        }
-                        area.innerHTML = `<a href="${selectedDownloadLink}" target="_blank" class="btn-save" style="background:#22c55e;">✅ Premium Direct Link</a>`;
+        if(token) {
+            const tSnap = await getDocs(query(collection(db, "premium"), where("token", "==", token)));
+            if(!tSnap.empty) {
+                const tData = tSnap.docs[0].data();
+                if(tData.expiry > Date.now()) {
+                    let devId = localStorage.getItem('device_id');
+                    if(!devId) { devId = "DEV-" + Math.random().toString(36).substr(2,10); localStorage.setItem('device_id', devId); }
+                    if(!tData.lockedDevice || tData.lockedDevice === devId) {
+                        if(!tData.lockedDevice) await setDoc(doc(db, "premium", tSnap.docs[0].id), { lockedDevice: devId }, { merge: true });
+                        area.innerHTML = `<a href="${selectedDownloadLink}" target="_blank" class="btn-save" style="background:#16a34a; display:inline-block; text-decoration:none;">✅ Direct Download</a>`;
                         return;
-                    } else {
-                        area.innerHTML = '<span style="color:red;">⚠️ Token is locked to another device!</span>';
-                        return;
-                    }
-                } else {
-                    area.innerHTML = '<span style="color:red;">Token Expired!</span>';
-                    return;
-                }
-            } else {
-                area.innerHTML = '<span style="color:red;">Invalid Token!</span>';
-                return;
-            }
+                    } else { area.innerHTML = '<span style="color:red;">Token locked to another device.</span>'; return; }
+                } else { area.innerHTML = '<span style="color:red;">Token expired.</span>'; return; }
+            } else { area.innerHTML = '<span style="color:red;">Invalid token.</span>'; return; }
         }
-
-        // 2. Free user shortener
         try {
-            const settingsSnap = await getDoc(doc(db, "settings", "shorteners"));
-            if(!settingsSnap.exists()) {
-                area.innerHTML = 'Shortener keys not set by admin.';
-                return;
-            }
-            const list = settingsSnap.data().list;
-            const rand = list[Math.floor(Math.random() * list.length)];
-            const apiUrl = `${rand.url}?api=${rand.key}&url=${encodeURIComponent(selectedDownloadLink)}&format=text`;
+            const setSnap = await getDoc(doc(db, "settings", "shorteners"));
+            if(!setSnap.exists()) { area.innerHTML = 'Shorteners not configured.'; return; }
+            const list = setSnap.data().list;
+            const r = list[Math.floor(Math.random() * list.length)];
+            const apiUrl = `${r.url}?api=${r.key}&url=${encodeURIComponent(selectedDownloadLink)}&format=text`;
             const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`);
-            const shortLink = await res.text();
-            if(shortLink && shortLink.startsWith('http')) {
-                area.innerHTML = `<button onclick="submitForm('${shortLink}')" class="btn-save">📥 Download via Shortener</button>`;
-            } else {
-                area.innerHTML = 'Shortener API error. Try again.';
-            }
-        } catch(e) {
-            area.innerHTML = 'Network error.';
-        }
+            const short = await res.text();
+            if(short && short.startsWith('http')) {
+                area.innerHTML = `<button onclick="submitForm('${short}')" class="btn-save">📥 Download via Shortener</button>`;
+            } else { area.innerHTML = 'Shortener error.'; }
+        } catch(e) { area.innerHTML = 'Network error.'; }
     };
 
     window.submitForm = (url) => {
-        const form = document.createElement('form');
-        form.method = 'GET';
-        form.action = url;
-        form.target = '_blank';
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
+        const f = document.createElement('form'); f.method='GET'; f.action=url; f.target='_blank';
+        document.body.appendChild(f); f.submit(); document.body.removeChild(f);
     };
 
-    // initial load only if unlocked
-    if(sessionStorage.getItem('site_unlocked') === 'true') {
-        loadContent();
-    }
+    if(sessionStorage.getItem('site_unlocked') === 'true') loadContent();
 </script>
 </body>
 </html>
