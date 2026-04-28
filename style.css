@@ -1,120 +1,262 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Sub Studio | Watch & Share</title>
-    <meta name="description" content="Your hub for anime, short videos, and community content. Join Telegram for updates.">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+/* Modern Professional Theme for Anime Sub Studio */
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --accent: #e11d48;
+  --accent-hover: #be123c;
+  --border: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
 
-<header>
-    <a href="index.html" class="logo">ANIME <span>SUB STUDIO</span></a>
-    <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="mainSearch" placeholder="Search by Name or Genre...">
-    </div>
-</header>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-<div class="master-layout">
-    <aside class="sidebar">
-        <div class="widget">
-            <div class="widget-title">Categories</div>
-            <div class="cat-list" id="catList">
-                <button class="cat-btn active" onclick="filterData('All', this)">All Updates</button>
-                <button class="cat-btn" onclick="filterData('Short Video', this)">Short Videos</button>
-                <button class="cat-btn" onclick="filterData('Anime', this)">Anime</button>
-                <button class="cat-btn" onclick="filterData('K-Drama', this)">K-Dramas</button>
-                <button class="cat-btn" onclick="filterData('Movie', this)">Movies</button>
-                <button class="cat-btn" onclick="filterData('Series', this)">Web Series</button>
-            </div>
-        </div>
-        <div class="widget">
-            <div class="widget-title">A-Z Directory</div>
-            <div class="az-grid" id="azGrid">
-                <button class="az-btn active" onclick="filterLetter('All', this)">ALL</button>
-                <button class="az-btn" onclick="filterLetter('0-9', this)">0-9</button>
-            </div>
-        </div>
-    </aside>
-    <main class="main-view">
-        <div class="anime-grid" id="gridDisplay"></div>
-    </main>
-</div>
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.6;
+  padding-bottom: 80px;
+}
 
-<div class="social-footer">
-    <a href="https://t.me/YOUR_CHANNEL" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Join Channel</a>
-    <a href="https://t.me/YOUR_GROUP" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Discussion</a>
-</div>
+/* Header */
+header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-decoration: none;
+}
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A",
-        authDomain: "animesubstudio-256ec.firebaseapp.com",
-        projectId: "animesubstudio-256ec",
-        storageBucket: "animesubstudio-256ec.firebasestorage.app",
-        messagingSenderId: "439418566080",
-        appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
-    };
+.logo span {
+  color: var(--text);
+}
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    let allData = [];
+/* Search */
+.search-box {
+  position: relative;
+  width: 300px;
+}
 
-    // Build A-Z buttons
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
-        document.getElementById('azGrid').innerHTML += `<button class="az-btn" onclick="filterLetter('${l}', this)">${l}</button>`;
-    });
+.search-box input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  font-size: 0.95rem;
+  outline: none;
+}
 
-    async function loadData() {
-        const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
-        allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        render(allData);
-    }
+.search-box input:focus {
+  border-color: var(--accent);
+}
 
-    window.render = (list) => {
-        const grid = document.getElementById('gridDisplay');
-        if(list.length === 0) {
-            grid.innerHTML = "<p style='color:var(--text-dim); text-align:center; padding:30px;'>No Content Found!</p>";
-            return;
-        }
-        grid.innerHTML = list.map(a => `
-            <div class="anime-card" onclick="location.href='detail.html?id=${a.id}'">
-                <div class="type-tag">${a.type}</div>
-                <img src="${a.image}" loading="lazy" alt="${a.name}">
-                <div class="card-details">
-                    <h3>${a.name}</h3>
-                    <div style="font-size:11px; color:var(--primary); margin-top:5px;">${a.genre}</div>
-                </div>
-            </div>
-        `).join('');
-    };
+.search-box i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+}
 
-    window.filterData = (type, btn) => {
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        render(type === 'All' ? allData : allData.filter(a => a.type === type));
-    };
+/* Layout */
+.master-layout {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem 5%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
-    window.filterLetter = (l, btn) => {
-        document.querySelectorAll('.az-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if(l === 'All') render(allData);
-        else if(l === '0-9') render(allData.filter(a => /^\d/.test(a.name)));
-        else render(allData.filter(a => a.name.toUpperCase().startsWith(l)));
-    };
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+}
 
-    document.getElementById('mainSearch').oninput = (e) => {
-        const val = e.target.value.toLowerCase();
-        render(allData.filter(a => a.name.toLowerCase().includes(val) || a.genre.toLowerCase().includes(val)));
-    };
+.main-view {
+  flex: 1;
+}
 
-    loadData();
-</script>
-</body>
-</html>
+/* Widgets */
+.widget {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.widget-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--accent);
+}
+
+/* Category Buttons */
+.cat-btn {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.25rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.cat-btn:hover, .cat-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* A-Z Grid */
+.az-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.25rem;
+}
+
+.az-btn {
+  padding: 0.5rem;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.az-btn:hover, .az-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Anime Cards */
+.anime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.anime-card {
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.anime-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
+}
+
+.anime-card img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+}
+
+.type-tag {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: var(--accent);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.card-details {
+  padding: 1rem;
+}
+
+.card-details h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer */
+.social-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  z-index: 100;
+}
+
+.social-footer a {
+  text-decoration: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-tg {
+  background: #e8f4fd;
+  color: #0088cc;
+}
+
+.btn-gc {
+  background: #f1f5f9;
+  color: var(--text);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .master-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+  }
+  .anime-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .search-box {
+    width: 200px;
+  }
+}
