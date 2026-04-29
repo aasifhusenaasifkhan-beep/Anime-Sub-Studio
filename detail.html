@@ -5,34 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Watch Online | Hindi Sub Studio</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .unlock-box { display: none; background: #111; padding: 25px; border-radius: 12px; margin-top: 20px; border: 1px dashed var(--primary); text-align: center; }
+        .unlock-box input { width: 70%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: none; outline: none; text-align: center; }
+    </style>
 </head>
 <body>
 
     <header><a href="index.html" class="logo">HINDI SUB <span>STUDIO</span></a></header>
-    <a href="index.html" style="color:var(--primary); text-decoration:none; margin:20px; display:inline-block;">← Back to Home</a>
+    <a href="index.html" style="color:var(--primary); text-decoration:none; margin:20px; display:inline-block; font-weight:bold;">← Back to Home</a>
 
-    <div id="detailBox"></div>
+    <!-- MAIN DETAIL BOX -->
+    <div id="detailBox">
+        <h3 style="color:white; text-align:center; padding:50px;">Loading Data...</h3>
+    </div>
 
-    <!-- PLAYER SECTION (HIDDEN BY DEFAULT) -->
+    <!-- INLINE PASSWORD BOX (NO POPUPS) -->
+    <div id="unlockBox" class="unlock-box" style="max-width:800px; margin:20px auto;">
+        <h3 style="color:var(--primary); margin-bottom:10px;">🔒 Locked Episode</h3>
+        <p style="color:#aaa; font-size:13px; margin-bottom:15px;">Enter today's daily password to watch and download.</p>
+        <input type="text" id="epPassInput" placeholder="Enter Password Here">
+        <br>
+        <button class="btn-main" style="width:70%;" onclick="submitPass()">Unlock Now</button>
+        <p style="margin-top:15px; font-size:13px;">
+            <a href="https://t.me/hindisubinganime" target="_blank" style="color:var(--primary); text-decoration:none; font-weight:bold;">👉 Click Here to Get Password from Telegram</a>
+        </p>
+    </div>
+
+    <!-- PLAYER & DOWNLOAD SECTION (HIDDEN INITIALLY) -->
     <div id="playerArea" class="player-box" style="max-width:1000px; margin:20px auto;">
-        <h3 style="color:var(--primary); margin-bottom:15px;" id="playingTitle"></h3>
+        <h3 style="color:var(--primary); margin-bottom:15px;" id="playingTitle">Playing Episode</h3>
+        
         <iframe id="vidPlayer" allowfullscreen></iframe>
         
         <div class="download-box">
-            <h3 style="color:white;">📥 Download Episode</h3>
+            <h3 style="color:white; text-align:center; margin-bottom:15px;">📥 Download Episode</h3>
             
             <!-- VIP DOWNLOAD -->
-            <div style="background:#111; padding:15px; border-radius:10px; border:1px dashed gold;">
-                <h4 style="color:gold; margin-bottom:10px;">💎 Premium VIP Users</h4>
-                <input type="text" id="vipToken" placeholder="Enter VIP Token" style="padding:10px; width:60%; border-radius:5px; border:none;">
-                <button class="btn-main btn-green" style="width:35%;" onclick="verifyVIP()">Direct Download</button>
+            <div style="background:#111; padding:20px; border-radius:10px; border:1px solid gold; text-align:center;">
+                <h4 style="color:gold; margin-bottom:10px;">💎 Premium VIP Download</h4>
+                <input type="text" id="vipToken" placeholder="Enter VIP Token" style="padding:10px; width:60%; border-radius:5px; border:none; text-align:center; margin-bottom:10px;">
+                <br>
+                <button class="btn-main btn-green" style="width:60%;" onclick="verifyVIP()">Direct Download (Ad-Free)</button>
             </div>
 
-            <p style="text-align:center; margin:10px 0;">OR</p>
+            <p style="text-align:center; margin:15px 0; font-weight:bold; color:#aaa;">OR</p>
 
-            <!-- FREE DOWNLOAD (OLD CODE) -->
+            <!-- FREE DOWNLOAD -->
             <button class="btn-main" id="freeBtn" onclick="generateLink()">Free Download (via Shortener)</button>
+            <p id="freeMsg" style="text-align:center; color:var(--primary); margin-top:10px; font-weight:bold;"></p>
         </div>
     </div>
 
@@ -40,110 +61,112 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, query, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
+        // FIREBASE SETUP
         const app = initializeApp({ apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com", projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app", messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425" });
         const db = getFirestore(app);
-        const postId = new URLSearchParams(window.location.search).get('id');
         
+        const postId = new URLSearchParams(window.location.search).get('id');
         let globalPass = "";
         let shorteners =[];
-        let currentEpData = null; // Store selected episode live/down links
+        let currentEpData = null;
 
         async function load() {
-            if(!postId) return;
+            if(!postId) {
+                document.getElementById("detailBox").innerHTML = "<h3 style='color:red; text-align:center;'>Error: Post ID Missing!</h3>";
+                return;
+            }
             
-            // Get Settings
+            // Get Master Settings
             const sSnap = await getDoc(doc(db, "settings", "main"));
             if(sSnap.exists()){ globalPass = sSnap.data().globalPassword; shorteners = sSnap.data().shorteners ||[]; }
 
-            // Get Post & Episodes
+            // Get Post Info
             const pSnap = await getDoc(doc(db, "posts", postId));
             const eSnap = await getDocs(query(collection(db, "episodes"), where("postId", "==", postId)));
             
             if (pSnap.exists()) {
                 const p = pSnap.data();
-                const eps = eSnap.docs.map(d => d.data()).sort((a,b) => a.num - b.num);
+                const eps = eSnap.docs.map(d => d.data()).sort((a,b) => parseFloat(a.num) - parseFloat(b.num));
                 
                 let epsHtml = eps.map(e => `
                     <div class="ep-btn" onclick="playEpisode('${e.num}', '${e.live}', '${e.down}')">Episode ${e.num}</div>
                 `).join('');
 
-                if(eps.length === 0) epsHtml = "<p>No Episodes uploaded yet.</p>";
+                if(eps.length === 0) epsHtml = "<p style='color:gray;'>No Episodes uploaded yet.</p>";
 
                 document.getElementById("detailBox").innerHTML = `
                     <div class="detail-container">
                         <img src="${p.image}" class="detail-img">
                         <div class="detail-info">
                             <h1 style="color:var(--primary);">${p.name}</h1>
-                            <p style="color:var(--text-muted); margin:10px 0;">${p.genre} | ${p.type} | ${p.date}</p>
-                            <p style="background:#111; padding:15px; border-radius:10px; margin-bottom:20px; color:#ccc; line-height:1.6;">${p.story}</p>
-                            <h3>📺 Select Episode:</h3>
-                            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:10px; margin-top:15px;">
+                            <p style="color:var(--text-muted); margin:10px 0; font-size:14px; font-weight:bold;">${p.genre} | ${p.type} | ${p.date}</p>
+                            <p style="background:#111; padding:15px; border-radius:10px; margin-bottom:20px; color:#ccc; line-height:1.6; font-size:14px;">${p.story}</p>
+                            
+                            <h3 style="margin-bottom:10px;">📺 Select Episode:</h3>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:10px;">
                                 ${epsHtml}
                             </div>
                         </div>
                     </div>
                 `;
+            } else {
+                document.getElementById("detailBox").innerHTML = "<h3 style='color:red; text-align:center;'>Post Not Found!</h3>";
             }
         }
 
-        // PASSWORD LOGIC (ON EPISODE CLICK)
-        window.playEpisode = async (num, liveUrl, downUrl) => {
-            currentEpData = { live: liveUrl, down: downUrl };
+        // --- PASSWORD SYSTEM (NO POPUPS, 100% WORKING) ---
+        window.playEpisode = (num, liveUrl, downUrl) => {
+            currentEpData = { live: liveUrl, down: downUrl, num: num };
             
-            // Check if user already entered password in this session
+            // Agar pehle hi password daal chuka hai (session active)
             if(sessionStorage.getItem('hss_unlocked') === 'true') {
-                showPlayer(num);
-                return;
-            }
-
-            // Ask Password
-            const { value: pass } = await Swal.fire({
-                title: 'Enter Password',
-                input: 'text',
-                text: 'Join Telegram to get the daily password!',
-                showCancelButton: true,
-                confirmButtonText: 'Unlock',
-                footer: '<a href="https://t.me/hindisubinganime" target="_blank" style="color:#ff4500;">Get Password Here</a>'
-            });
-
-            if(pass) {
-                if(pass === globalPass) {
-                    sessionStorage.setItem('hss_unlocked', 'true');
-                    Swal.fire('Unlocked!', 'Enjoy the video.', 'success');
-                    showPlayer(num);
-                } else {
-                    Swal.fire('Wrong Password', 'Please check Telegram for the correct password.', 'error');
-                }
+                showPlayer();
+            } else {
+                // Password box dikhao
+                document.getElementById('unlockBox').style.display = 'block';
+                document.getElementById('playerArea').style.display = 'none';
+                window.scrollTo({ top: document.getElementById('unlockBox').offsetTop, behavior: 'smooth' });
             }
         };
 
-        function showPlayer(num) {
+        window.submitPass = () => {
+            const pass = document.getElementById('epPassInput').value.trim();
+            if(pass === globalPass) {
+                sessionStorage.setItem('hss_unlocked', 'true'); // Save session
+                document.getElementById('unlockBox').style.display = 'none'; // Hide box
+                showPlayer(); // Show Video
+            } else {
+                alert("❌ Wrong Password! Please join Telegram to get today's password.");
+            }
+        };
+
+        function showPlayer() {
             document.getElementById('playerArea').style.display = 'block';
-            document.getElementById('playingTitle').innerText = "Playing: Episode " + num;
-            document.getElementById('vidPlayer').src = currentEpData.live;
-            window.scrollTo({ top: document.getElementById('playerArea').offsetTop, behavior: 'smooth' });
+            document.getElementById('playingTitle').innerText = "▶️ Playing: Episode " + currentEpData.num;
+            document.getElementById('vidPlayer').src = currentEpData.live; // Play SeekStreaming Link
+            window.scrollTo({ top: document.getElementById('playerArea').offsetTop - 20, behavior: 'smooth' });
         }
 
-        // VIP DOWNLOAD LOGIC
+        // --- VIP PREMIUM LOGIC ---
         window.verifyVIP = async () => {
             const token = document.getElementById('vipToken').value.trim();
-            if(!token) return Swal.fire('Error', 'Enter Token!', 'error');
+            if(!token) return alert('Please enter VIP Token!');
 
             let devId = localStorage.getItem('hss_dev');
-            if(!devId) { devId = "D-" + Math.random().toString(36).substr(2,8); localStorage.setItem('hss_dev', devId); }
+            if(!devId) { devId = "D-" + Math.random().toString(36).substr(2,10); localStorage.setItem('hss_dev', devId); }
 
             const snap = await getDocs(query(collection(db, "premium"), where("token", "==", token)));
             if(!snap.empty) {
                 const data = snap.docs[0].data();
-                if(data.expiry < Date.now()) return Swal.fire('Error', 'Token Expired!', 'error');
+                if(data.expiry < Date.now()) return alert('❌ Token Expired!');
                 if(!data.lockedDevice || data.lockedDevice === devId) {
                     if(!data.lockedDevice) await setDoc(doc(db, "premium", snap.docs[0].id), { lockedDevice: devId }, { merge: true });
-                    window.open(currentEpData.down, "_blank");
-                } else Swal.fire('Error', 'Token locked to another device!', 'error');
-            } else Swal.fire('Error', 'Invalid Token!', 'error');
+                    window.open(currentEpData.down, "_blank"); // Open direct link
+                } else alert('❌ Fraud Detected! Token is locked to another device.');
+            } else alert('❌ Invalid VIP Token!');
         };
 
-        // AAPKA PURANA ORIGINAL SHORTENER CODE (Bypass Preventer + Form Submit)
+        // --- FREE SHORTENER LOGIC (YOUR ORIGINAL BYPASS METHOD) ---
         function makeUniqueUrl(original) {
             const hashIndex = original.indexOf('#');
             let hash = "", base = original;
@@ -154,12 +177,20 @@
 
         window.generateLink = async () => {
             const btn = document.getElementById('freeBtn');
-            if(shorteners.length === 0) return Swal.fire('Error', 'Admin has not setup shortener API.', 'error');
+            const msg = document.getElementById('freeMsg');
             
-            btn.innerText = "Generating Link..."; btn.disabled = true;
+            if(shorteners.length === 0) {
+                msg.innerText = "❌ Admin has not setup Shortener API yet!";
+                return;
+            }
+            
+            btn.innerText = "⏳ Generating Secure Link..."; 
+            btn.disabled = true;
+            msg.innerText = "";
 
             const rand = shorteners[Math.floor(Math.random() * shorteners.length)];
             const bypassedLink = makeUniqueUrl(currentEpData.down);
+            
             let apiBase = rand.url.trim();
             if(!apiBase.startsWith('http')) apiBase = 'https://' + apiBase;
             if(!apiBase.endsWith('/api')) apiBase += '/api';
@@ -167,29 +198,30 @@
             const apiUrl = `${apiBase}?api=${rand.key.trim()}&url=${encodeURIComponent(bypassedLink)}&format=text`;
 
             try {
-                // Direct Fetch
-                let res = await fetch(apiUrl).catch(()=>null);
-                let finalLink = res ? await res.text() : "";
-
-                // Proxy Fetch if direct fails
-                if(!finalLink || !finalLink.startsWith('http')) {
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-                    res = await fetch(proxyUrl);
-                    finalLink = await res.text();
-                }
+                // Try Proxy Fetch
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                const res = await fetch(proxyUrl);
+                const finalLink = await res.text();
 
                 if(finalLink && finalLink.startsWith('http')) {
+                    // Force open via hidden form to prevent Adblocker pop-up block
                     const form = document.createElement('form');
                     form.method = "GET"; form.action = finalLink.trim(); form.target = "_blank";
                     document.body.appendChild(form); form.submit(); document.body.removeChild(form);
-                } else throw new Error("API Error");
+                    
+                    msg.innerText = "✅ Link Opened Successfully!";
+                } else {
+                    msg.innerText = "❌ API Error. Check Admin Panel Keys.";
+                }
             } catch(e) {
-                Swal.fire('Error', 'Ad-Blocker detected or Network Error. Please disable it.', 'error');
+                msg.innerText = "❌ Network Error. Please Turn Off Ad-Blocker.";
             } finally {
-                btn.innerText = "Free Download (via Shortener)"; btn.disabled = false;
+                btn.innerText = "Free Download (via Shortener)"; 
+                btn.disabled = false;
             }
         };
 
+        // Start Process
         load();
     </script>
 </body>
