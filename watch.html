@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch & Download | Hindi Sub Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .watch-container { max-width: 800px; margin: 40px auto; background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid var(--border); text-align: center; }
+        .player { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 10px; display: none; margin-bottom: 20px; background: #000; }
+        .pass-box { background: rgba(255, 69, 0, 0.1); border: 1px dashed var(--primary); padding: 30px; border-radius: 10px; margin-bottom: 20px; }
+        .down-box { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+
+<div class="watch-container">
+    <h2 style="margin-bottom:20px; color:var(--primary);">📺 Episode Player</h2>
+
+    <!-- Password Lock Section -->
+    <div id="passSection" class="pass-box">
+        <h3>🔒 Protected Content</h3>
+        <p style="font-size:13px; color:var(--text-dim); margin:10px 0;">Enter the daily password to watch this video.</p>
+        <input type="text" id="userInput" placeholder="Enter Password Here" style="max-width:300px; text-align:center;">
+        <button class="btn" style="max-width:300px;" onclick="checkPassword()">Unlock Video</button>
+        <br><br>
+        <a href="https://t.me/hindisubinganime" target="_blank" style="color:var(--primary); text-decoration:none; font-weight:bold;">👉 Click Here to Get Password from Telegram</a>
+    </div>
+
+    <!-- Video Player (Hidden initially) -->
+    <iframe id="vidPlayer" class="player" allowfullscreen></iframe>
+
+    <!-- Download Section (Hidden initially) -->
+    <div id="downSection" class="down-box">
+        <h3>📥 Download Episode</h3>
+        
+        <!-- Premium Logic -->
+        <div style="background:#111; padding:15px; border-radius:8px; margin:15px 0;">
+            <p style="font-size:12px; color:gray; margin-bottom:10px;">Premium VIP Users (Direct Download):</p>
+            <input type="text" id="tokenInput" placeholder="Enter Premium Token" style="max-width:250px; text-align:center;">
+            <button class="btn btn-green" style="max-width:250px;" onclick="verifyPremium()">Direct Download (VIP)</button>
+        </div>
+
+        <p>OR</p>
+        
+        <!-- Free User Shortener -->
+        <button class="btn" onclick="generateFreeLink()">Free Download (via Shortener)</button>
+        <div id="statusMsg" style="margin-top:10px; color:var(--primary);"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, getDocs, collection, query, where, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+    const app = initializeApp({
+        apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com",
+        projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app",
+        messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
+    });
+    const db = getFirestore(app);
+    const epId = new URLSearchParams(window.location.search).get('epId');
+    let epData = null;
+    let globalPass = "";
+    let shorteners = [];
+
+    async function load() {
+        if(!epId) return;
+        const eSnap = await getDoc(doc(db, "episodes", epId));
+        if(eSnap.exists()) epData = eSnap.data();
+
+        const sSnap = await getDoc(doc(db, "settings", "main"));
+        if(sSnap.exists()) {
+            globalPass = sSnap.data().globalPassword;
+            shorteners = sSnap.data().shorteners || [];
+        }
+    }
+
+    // 1. Password Check
+    window.checkPassword = () => {
+        const input = document.getElementById('userInput').value;
+        if(input === globalPass) {
+            document.getElementById('passSection').style.display = 'none';
+            document.getElementById('vidPlayer').src = epData.live;
+            document.getElementById('vidPlayer').style.display = 'block';
+            document.getElementById('downSection').style.display = 'block';
+        } else {
+            alert("Wrong Password! Join Telegram to get the correct password.");
+        }
+    };
+
+    // 2. Premium VIP Verification (Device Lock)
+    window.verifyPremium = async () => {
+        const token = document.getElementById('tokenInput').value.trim();
+        const msg = document.getElementById('statusMsg');
+        if(!token) return alert("Enter token!");
+        
+        let deviceId = localStorage.getItem('my_device');
+        if(!deviceId) { deviceId = "DEV-" + Math.random().toString(36).substr(2, 10); localStorage.setItem('my_device', deviceId); }
+
+        msg.innerText = "Checking VIP...";
+        const snap = await getDocs(query(collection(db, "premium"), where("token", "==", token)));
+        
+        if(!snap.empty) {
+            const tData = snap.docs[0].data();
+            if(tData.expiry < Date.now()) return msg.innerHTML = "<span style='color:red;'>Token Expired!</span>";
+            
+            if(!tData.lockedDevice || tData.lockedDevice === deviceId) {
+                if(!tData.lockedDevice) await setDoc(doc(db, "premium", snap.docs[0].id), { lockedDevice: deviceId }, { merge: true });
+                msg.innerHTML = "VIP Confirmed! Redirecting...";
+                window.open(epData.down, "_blank");
+            } else {
+                msg.innerHTML = "<span style='color:red;'>Token used on another device! Fraud detected.</span>";
+            }
+        } else {
+            msg.innerHTML = "<span style='color:red;'>Invalid Token!</span>";
+        }
+    };
+
+    // 3. Free Shortener Download
+    window.generateFreeLink = async () => {
+        const msg = document.getElementById('statusMsg');
+        if(shorteners.length === 0) return msg.innerText = "Shortener not setup by Admin!";
+        
+        msg.innerText = "Generating Secure Link...";
+        const rand = shorteners[Math.floor(Math.random() * shorteners.length)];
+        
+        // Bypass preventer logic
+        const bypassedUrl = epData.down + "?uid=" + Math.floor(Date.now()/86400000);
+        const api = `${rand.url}?api=${rand.key}&url=${encodeURIComponent(bypassedUrl)}&format=text`;
+
+        try {
+            const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(api)}`);
+            const finalLink = await res.text();
+            if(finalLink.startsWith('http')) {
+                const form = document.createElement('form');
+                form.method = "GET"; form.action = finalLink; form.target = "_blank";
+                document.body.appendChild(form); form.submit();
+                msg.innerText = "Redirected successfully!";
+            } else { msg.innerText = "API Error. Try again."; }
+        } catch(e) { msg.innerText = "Network Error."; }
+    };
+
+    load();
+</script>
+</body>
+</html>
