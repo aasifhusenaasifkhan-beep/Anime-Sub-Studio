@@ -6,14 +6,11 @@
     <title>Master Admin | Hindi Sub Studio</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
-    <style>
-        .preview-img { width: 120px; height: 180px; object-fit: cover; border-radius: 8px; display: none; margin-bottom: 10px; border: 2px solid var(--primary); }
-    </style>
 </head>
 <body>
 
 <div class="admin-container">
-    <h1 class="admin-title">👑 Hindi Sub Studio Control</h1>
+    <h1 class="admin-title">👑 Master Admin Panel</h1>
 
     <!-- LOGIN -->
     <div id="loginBox" class="admin-box" style="max-width:400px; margin:auto;">
@@ -32,21 +29,27 @@
             <button class="btn active" onclick="switchTab('addPost')">🎬 Add Post</button>
             <button class="btn" onclick="switchTab('addEp')">📺 Episodes</button>
             <button class="btn" onclick="switchTab('settings')">⚙️ Settings</button>
-            <button class="btn" onclick="switchTab('premium')">💎 Premium</button>
+            <button class="btn" onclick="switchTab('premium')">💎 Premium VIP</button>
         </div>
 
         <!-- ADD POST -->
         <div id="addPost" class="admin-box tab-content">
             <h3>🎬 Create New Post</h3>
-            <input id="pName" placeholder="Title (e.g., Solo Leveling)">
+            <input id="pName" placeholder="Name (e.g., Solo Leveling)">
             <div class="grid-2">
                 <select id="pType">
                     <option value="Anime Hindi Sub">Anime Hindi Sub</option>
                     <option value="Anime Hindi Dub">Anime Hindi Dub</option>
-                    <option value="K-Drama">K-Drama (Sub/Dub)</option>
-                    <option value="Series">Web Series</option>
-                    <option value="Donghua">Donghua</option>
-                    <option value="Movie">Movie</option>
+                    <option value="Anime English Sub">Anime English Sub</option>
+                    <option value="Anime English Dub">Anime English Dub</option>
+                    <option value="K-Drama Hindi Sub">K-Drama Hindi Sub</option>
+                    <option value="K-Drama Hindi Dub">K-Drama Hindi Dub</option>
+                    <option value="Series Hindi Sub">Series Hindi Sub</option>
+                    <option value="Series Hindi Dub">Series Hindi Dub</option>
+                    <option value="Donghua Hindi Sub">Donghua Hindi Sub</option>
+                    <option value="Donghua Hindi Dub">Donghua Hindi Dub</option>
+                    <option value="Movie Hindi Sub">Movie Hindi Sub</option>
+                    <option value="Movie Hindi Dub">Movie Hindi Dub</option>
                 </select>
                 <input id="pGenre" placeholder="Genre (e.g., Action, Romance)">
             </div>
@@ -54,42 +57,40 @@
                 <input id="pDate" placeholder="Release Year">
                 <button type="button" class="btn" style="background:#333;" onclick="uploadPoster()">🖼️ Upload Poster</button>
             </div>
-            <img id="previewImg" class="preview-img">
             <input type="hidden" id="pImg">
             <textarea id="pStory" rows="4" placeholder="Storyline..."></textarea>
             <button class="btn" onclick="savePost()">Publish Post</button>
         </div>
 
-        <!-- ADD EPISODE (WITH SEARCH FIX) -->
+        <!-- ADD EPISODE -->
         <div id="addEp" class="admin-box tab-content" style="display:none;">
-            <h3>📺 Add Episodes</h3>
-            <input type="text" id="searchPost" placeholder="🔍 Search Post Name here..." oninput="filterSelect()">
+            <h3>📺 Manage Episodes</h3>
             <select id="epPostSelect" onchange="loadEpisodes()"><option value="">Select Show...</option></select>
-            
-            <div class="grid-2" style="margin-top:15px;">
-                <input id="epNum" type="number" placeholder="Episode No. (e.g., 1)">
-                <input id="epLive" placeholder="Live Play Link (SeekStreaming)">
+            <div class="grid-2">
+                <input id="epNum" type="number" placeholder="Episode Number">
+                <input id="epLive" placeholder="⚠️ ONLY SeekStreaming Link (Live Video)">
             </div>
-            <input id="epDown" placeholder="Download Link (Telegram File)">
-            <button class="btn" onclick="saveEpisode()">Add Episode</button>
-            
-            <h4 style="margin-top:20px; color:#ff4500;">Episodes for selected show:</h4>
+            <input id="epDown" placeholder="📥 Telegram Direct File Link (Download)">
+            <button class="btn" onclick="saveEpisode()">Save Episode</button>
+            <h4 style="margin-top:20px;">Added Episodes:</h4>
             <div id="epList"></div>
         </div>
 
         <!-- SETTINGS -->
         <div id="settings" class="admin-box tab-content" style="display:none;">
-            <h3>⚙️ Master Settings</h3>
-            <input id="globalPass" placeholder="Set Global Password for Live Video">
-            <h4 style="color:#ff4500; margin-top:15px;">🔗 Shortener Accounts</h4>
-            <div class="grid-2"><input id="s1u" placeholder="Shortener 1 URL"><input id="s1k" placeholder="API Key 1"></div>
-            <div class="grid-2"><input id="s2u" placeholder="Shortener 2 URL"><input id="s2k" placeholder="API Key 2"></div>
-            <button class="btn btn-green" onclick="saveSettings()">Save Settings</button>
+            <h3>⚙️ Site Settings</h3>
+            <input id="globalPass" placeholder="Set Password for Live Video Player">
+            <h4 style="color:#ff4500; margin-top:20px;">🔗 URL Shortener Accounts (Rotation)</h4>
+            <p style="font-size:12px; color:gray;">Base URL MUST include '/api' (e.g., https://shrinkme.io/api)</p>
+            <div class="grid-2"><input id="s1u" placeholder="Base URL 1"><input id="s1k" placeholder="API Key 1"></div>
+            <div class="grid-2"><input id="s2u" placeholder="Base URL 2"><input id="s2k" placeholder="API Key 2"></div>
+            <div class="grid-2"><input id="s3u" placeholder="Base URL 3"><input id="s3k" placeholder="API Key 3"></div>
+            <button class="btn btn-green" onclick="saveSettings()">Save Configuration</button>
         </div>
 
         <!-- PREMIUM -->
         <div id="premium" class="admin-box tab-content" style="display:none;">
-            <h3>💎 Generate Premium Token</h3>
+            <h3>💎 Generate Premium VIP Token</h3>
             <button class="btn btn-green" onclick="generateToken()">Generate 28-Days Token</button>
             <div id="tokenDisplay" style="margin-top:15px; font-size:18px; color:var(--primary);"></div>
         </div>
@@ -101,52 +102,31 @@
     import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, getDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-    const app = initializeApp({
-        apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com",
-        projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app",
-        messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
-    });
+    const app = initializeApp({ apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com", projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app", messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425" });
     const db = getFirestore(app); const auth = getAuth(app);
-    let allPosts = [];
 
     onAuthStateChanged(auth, user => {
         if(user) { document.getElementById('loginBox').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; loadSelectPosts(); loadSettingsData(); }
         else { document.getElementById('loginBox').style.display = 'block'; document.getElementById('dashboard').style.display = 'none'; }
     });
-
     window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message));
     window.logout = () => signOut(auth);
     window.switchTab = (id) => { document.querySelectorAll('.tab-content').forEach(t => t.style.display='none'); document.querySelectorAll('.tab-btns button').forEach(b => b.classList.remove('active')); document.getElementById(id).style.display='block'; event.target.classList.add('active'); };
 
     window.uploadPoster = () => {
         cloudinary.openUploadWidget({ cloudName: "dccbzyjtr", uploadPreset: "asi_anime_upload" }, (err, res) => {
-            if(!err && res.event === "success") {
-                document.getElementById('pImg').value = res.info.secure_url;
-                document.getElementById('previewImg').src = res.info.secure_url;
-                document.getElementById('previewImg').style.display = "block";
-            }
+            if(!err && res.event === "success") { document.getElementById('pImg').value = res.info.secure_url; alert("Poster Saved!"); }
         });
     };
 
     window.savePost = async () => {
         await addDoc(collection(db, "posts"), { name: document.getElementById('pName').value, type: document.getElementById('pType').value, genre: document.getElementById('pGenre').value, date: document.getElementById('pDate').value, story: document.getElementById('pStory').value, image: document.getElementById('pImg').value, createdAt: Date.now() });
-        alert("Published!"); location.reload();
+        alert("Post Added!"); location.reload();
     };
 
     window.loadSelectPosts = async () => {
         const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
-        allPosts = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        renderSelect(allPosts);
-    };
-
-    window.renderSelect = (list) => {
-        const sel = document.getElementById('epPostSelect');
-        sel.innerHTML = '<option value="">Select Show...</option>' + list.map(p => `<option value="${p.id}">${p.name} (${p.type})</option>`).join('');
-    };
-
-    window.filterSelect = () => {
-        const val = document.getElementById('searchPost').value.toLowerCase();
-        renderSelect(allPosts.filter(p => p.name.toLowerCase().includes(val)));
+        document.getElementById('epPostSelect').innerHTML = '<option value="">Select Show...</option>' + snap.docs.map(d => `<option value="${d.id}">${d.data().name} (${d.data().type})</option>`).join('');
     };
 
     window.saveEpisode = async () => {
@@ -158,20 +138,42 @@
         const postId = document.getElementById('epPostSelect').value;
         const snap = await getDocs(query(collection(db, "episodes"), where("postId", "==", postId)));
         let arr = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => a.num - b.num);
-        document.getElementById('epList').innerHTML = arr.map(ep => `<div class="list-item">Ep ${ep.num} <button class="btn btn-red" style="width:auto; padding:5px 10px;" onclick="delEp('${ep.id}')">Delete</button></div>`).join('');
+        document.getElementById('epList').innerHTML = arr.map(ep => `<div style="padding:10px; border:1px solid #333; margin-bottom:5px;">Ep ${ep.num} <button style="background:red; color:white; border:none; padding:5px; float:right;" onclick="delEp('${ep.id}')">Delete</button></div>`).join('');
     };
     window.delEp = async (id) => { await deleteDoc(doc(db, "episodes", id)); loadEpisodes(); };
 
+    // Format Shortener URL function
+    function formatUrl(url) {
+        if(!url) return "";
+        let finalUrl = url.trim();
+        if(!finalUrl.startsWith('http')) finalUrl = 'https://' + finalUrl;
+        if(!finalUrl.endsWith('/api')) finalUrl += '/api';
+        return finalUrl;
+    }
+
     window.saveSettings = async () => {
-        await setDoc(doc(db, "settings", "main"), { globalPassword: document.getElementById('globalPass').value, shorteners: [{url: document.getElementById('s1u').value, key: document.getElementById('s1k').value}, {url: document.getElementById('s2u').value, key: document.getElementById('s2k').value}].filter(x=>x.key) });
-        alert("Saved!");
+        const list =[
+            {url: formatUrl(document.getElementById('s1u').value), key: document.getElementById('s1k').value},
+            {url: formatUrl(document.getElementById('s2u').value), key: document.getElementById('s2k').value},
+            {url: formatUrl(document.getElementById('s3u').value), key: document.getElementById('s3k').value}
+        ].filter(x => x.key && x.url);
+
+        await setDoc(doc(db, "settings", "main"), { globalPassword: document.getElementById('globalPass').value, shorteners: list });
+        alert("Settings Saved!");
     };
+
     window.loadSettingsData = async () => {
         const snap = await getDoc(doc(db, "settings", "main"));
-        if(snap.exists()) { document.getElementById('globalPass').value = snap.data().globalPassword || ""; }
+        if(snap.exists()) {
+            const d = snap.data();
+            document.getElementById('globalPass').value = d.globalPassword || "";
+            if(d.shorteners[0]){ document.getElementById('s1u').value = d.shorteners[0].url; document.getElementById('s1k').value = d.shorteners[0].key; }
+            if(d.shorteners[1]){ document.getElementById('s2u').value = d.shorteners[1].url; document.getElementById('s2k').value = d.shorteners[1].key; }
+        }
     };
+
     window.generateToken = async () => {
-        const t = "HSS-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+        const t = "VIP-" + Math.random().toString(36).substr(2, 8).toUpperCase();
         await addDoc(collection(db, "premium"), { token: t, lockedDevice: null, expiry: Date.now()+(28*86400000) });
         document.getElementById('tokenDisplay').innerText = t;
     };
