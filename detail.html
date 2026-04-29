@@ -2,58 +2,195 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Details | Hindi Sub Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Watch Online | Hindi Sub Studio</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .detail-box { display: flex; gap: 30px; padding: 40px 5%; max-width: 1000px; margin: auto; }
-        .detail-img { width: 250px; height: 350px; object-fit: cover; border-radius: 15px; border: 2px solid var(--primary); }
-        .ep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 20px; }
-        .ep-btn { background: var(--card); border: 1px solid var(--border); padding: 12px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .ep-btn:hover { background: var(--primary); color: white; }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
-<div class="detail-box" id="contentBox">Loading...</div>
+    <header><a href="index.html" class="logo">HINDI SUB <span>STUDIO</span></a></header>
+    <a href="index.html" style="color:var(--primary); text-decoration:none; margin:20px; display:inline-block;">← Back to Home</a>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    <div id="detailBox"></div>
 
-    const app = initializeApp({
-        apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com",
-        projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app",
-        messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
-    });
-    const db = getFirestore(app);
-    const id = new URLSearchParams(window.location.search).get('id');
-
-    async function load() {
-        if(!id) return;
-        const pSnap = await getDoc(doc(db, "posts", id));
-        const eSnap = await getDocs(query(collection(db, "episodes"), where("postId", "==", id)));
+    <!-- PLAYER SECTION (HIDDEN BY DEFAULT) -->
+    <div id="playerArea" class="player-box" style="max-width:1000px; margin:20px auto;">
+        <h3 style="color:var(--primary); margin-bottom:15px;" id="playingTitle"></h3>
+        <iframe id="vidPlayer" allowfullscreen></iframe>
         
-        if(pSnap.exists()) {
-            const p = pSnap.data();
-            const eps = eSnap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => a.num - b.num);
+        <div class="download-box">
+            <h3 style="color:white;">📥 Download Episode</h3>
             
-            let epsHtml = eps.map(e => `<div class="ep-btn" onclick="location.href='watch.html?epId=${e.id}'">Episode ${e.num}</div>`).join('');
-            if(eps.length === 0) epsHtml = "<p style='color:gray;'>Episodes coming soon!</p>";
+            <!-- VIP DOWNLOAD -->
+            <div style="background:#111; padding:15px; border-radius:10px; border:1px dashed gold;">
+                <h4 style="color:gold; margin-bottom:10px;">💎 Premium VIP Users</h4>
+                <input type="text" id="vipToken" placeholder="Enter VIP Token" style="padding:10px; width:60%; border-radius:5px; border:none;">
+                <button class="btn-main btn-green" style="width:35%;" onclick="verifyVIP()">Direct Download</button>
+            </div>
 
-            document.getElementById('contentBox').innerHTML = `
-                <img src="${p.image}" class="detail-img">
-                <div>
-                    <h1 style="color:var(--primary); margin-bottom:10px;">${p.name}</h1>
-                    <p style="color:var(--text-dim); margin-bottom:20px;"><strong>Genre:</strong> ${p.genre} | <strong>Year:</strong> ${p.date} | <strong>Type:</strong> ${p.type}</p>
-                    <p style="background:var(--card); padding:15px; border-radius:10px; line-height:1.6;">${p.story}</p>
-                    <h3 style="margin-top:30px;">Select Episode to Watch:</h3>
-                    <div class="ep-grid">${epsHtml}</div>
-                </div>
-            `;
+            <p style="text-align:center; margin:10px 0;">OR</p>
+
+            <!-- FREE DOWNLOAD (OLD CODE) -->
+            <button class="btn-main" id="freeBtn" onclick="generateLink()">Free Download (via Shortener)</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+        const app = initializeApp({ apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com", projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app", messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425" });
+        const db = getFirestore(app);
+        const postId = new URLSearchParams(window.location.search).get('id');
+        
+        let globalPass = "";
+        let shorteners =[];
+        let currentEpData = null; // Store selected episode live/down links
+
+        async function load() {
+            if(!postId) return;
+            
+            // Get Settings
+            const sSnap = await getDoc(doc(db, "settings", "main"));
+            if(sSnap.exists()){ globalPass = sSnap.data().globalPassword; shorteners = sSnap.data().shorteners ||[]; }
+
+            // Get Post & Episodes
+            const pSnap = await getDoc(doc(db, "posts", postId));
+            const eSnap = await getDocs(query(collection(db, "episodes"), where("postId", "==", postId)));
+            
+            if (pSnap.exists()) {
+                const p = pSnap.data();
+                const eps = eSnap.docs.map(d => d.data()).sort((a,b) => a.num - b.num);
+                
+                let epsHtml = eps.map(e => `
+                    <div class="ep-btn" onclick="playEpisode('${e.num}', '${e.live}', '${e.down}')">Episode ${e.num}</div>
+                `).join('');
+
+                if(eps.length === 0) epsHtml = "<p>No Episodes uploaded yet.</p>";
+
+                document.getElementById("detailBox").innerHTML = `
+                    <div class="detail-container">
+                        <img src="${p.image}" class="detail-img">
+                        <div class="detail-info">
+                            <h1 style="color:var(--primary);">${p.name}</h1>
+                            <p style="color:var(--text-muted); margin:10px 0;">${p.genre} | ${p.type} | ${p.date}</p>
+                            <p style="background:#111; padding:15px; border-radius:10px; margin-bottom:20px; color:#ccc; line-height:1.6;">${p.story}</p>
+                            <h3>📺 Select Episode:</h3>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:10px; margin-top:15px;">
+                                ${epsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
-    }
-    load();
-</script>
+
+        // PASSWORD LOGIC (ON EPISODE CLICK)
+        window.playEpisode = async (num, liveUrl, downUrl) => {
+            currentEpData = { live: liveUrl, down: downUrl };
+            
+            // Check if user already entered password in this session
+            if(sessionStorage.getItem('hss_unlocked') === 'true') {
+                showPlayer(num);
+                return;
+            }
+
+            // Ask Password
+            const { value: pass } = await Swal.fire({
+                title: 'Enter Password',
+                input: 'text',
+                text: 'Join Telegram to get the daily password!',
+                showCancelButton: true,
+                confirmButtonText: 'Unlock',
+                footer: '<a href="https://t.me/hindisubinganime" target="_blank" style="color:#ff4500;">Get Password Here</a>'
+            });
+
+            if(pass) {
+                if(pass === globalPass) {
+                    sessionStorage.setItem('hss_unlocked', 'true');
+                    Swal.fire('Unlocked!', 'Enjoy the video.', 'success');
+                    showPlayer(num);
+                } else {
+                    Swal.fire('Wrong Password', 'Please check Telegram for the correct password.', 'error');
+                }
+            }
+        };
+
+        function showPlayer(num) {
+            document.getElementById('playerArea').style.display = 'block';
+            document.getElementById('playingTitle').innerText = "Playing: Episode " + num;
+            document.getElementById('vidPlayer').src = currentEpData.live;
+            window.scrollTo({ top: document.getElementById('playerArea').offsetTop, behavior: 'smooth' });
+        }
+
+        // VIP DOWNLOAD LOGIC
+        window.verifyVIP = async () => {
+            const token = document.getElementById('vipToken').value.trim();
+            if(!token) return Swal.fire('Error', 'Enter Token!', 'error');
+
+            let devId = localStorage.getItem('hss_dev');
+            if(!devId) { devId = "D-" + Math.random().toString(36).substr(2,8); localStorage.setItem('hss_dev', devId); }
+
+            const snap = await getDocs(query(collection(db, "premium"), where("token", "==", token)));
+            if(!snap.empty) {
+                const data = snap.docs[0].data();
+                if(data.expiry < Date.now()) return Swal.fire('Error', 'Token Expired!', 'error');
+                if(!data.lockedDevice || data.lockedDevice === devId) {
+                    if(!data.lockedDevice) await setDoc(doc(db, "premium", snap.docs[0].id), { lockedDevice: devId }, { merge: true });
+                    window.open(currentEpData.down, "_blank");
+                } else Swal.fire('Error', 'Token locked to another device!', 'error');
+            } else Swal.fire('Error', 'Invalid Token!', 'error');
+        };
+
+        // AAPKA PURANA ORIGINAL SHORTENER CODE (Bypass Preventer + Form Submit)
+        function makeUniqueUrl(original) {
+            const hashIndex = original.indexOf('#');
+            let hash = "", base = original;
+            if (hashIndex !== -1) { hash = original.substring(hashIndex); base = original.substring(0, hashIndex); }
+            const dailyId = Math.floor(Date.now() / 86400000);
+            return base + (base.includes('?') ? '&' : '?') + "asi_uid=" + dailyId + hash;
+        }
+
+        window.generateLink = async () => {
+            const btn = document.getElementById('freeBtn');
+            if(shorteners.length === 0) return Swal.fire('Error', 'Admin has not setup shortener API.', 'error');
+            
+            btn.innerText = "Generating Link..."; btn.disabled = true;
+
+            const rand = shorteners[Math.floor(Math.random() * shorteners.length)];
+            const bypassedLink = makeUniqueUrl(currentEpData.down);
+            let apiBase = rand.url.trim();
+            if(!apiBase.startsWith('http')) apiBase = 'https://' + apiBase;
+            if(!apiBase.endsWith('/api')) apiBase += '/api';
+
+            const apiUrl = `${apiBase}?api=${rand.key.trim()}&url=${encodeURIComponent(bypassedLink)}&format=text`;
+
+            try {
+                // Direct Fetch
+                let res = await fetch(apiUrl).catch(()=>null);
+                let finalLink = res ? await res.text() : "";
+
+                // Proxy Fetch if direct fails
+                if(!finalLink || !finalLink.startsWith('http')) {
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                    res = await fetch(proxyUrl);
+                    finalLink = await res.text();
+                }
+
+                if(finalLink && finalLink.startsWith('http')) {
+                    const form = document.createElement('form');
+                    form.method = "GET"; form.action = finalLink.trim(); form.target = "_blank";
+                    document.body.appendChild(form); form.submit(); document.body.removeChild(form);
+                } else throw new Error("API Error");
+            } catch(e) {
+                Swal.fire('Error', 'Ad-Blocker detected or Network Error. Please disable it.', 'error');
+            } finally {
+                btn.innerText = "Free Download (via Shortener)"; btn.disabled = false;
+            }
+        };
+
+        load();
+    </script>
 </body>
 </html>
