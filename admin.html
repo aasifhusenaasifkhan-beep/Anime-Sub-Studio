@@ -2,84 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Panel | Anime Sub Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin | Hindi Sub Studio</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
 </head>
-<body style="padding:2rem;">
-<div id="loginBox" class="widget" style="max-width:400px; margin:2rem auto;">
-    <h3 style="color:var(--accent); text-align:center;">🔐 Admin Login</h3>
-    <input type="email" id="email" placeholder="Admin Email" style="background:white;">
-    <input type="password" id="pass" placeholder="Password" style="background:white;">
-    <button class="btn-save" onclick="login()" style="width:100%;">Login</button>
-</div>
+<body>
 
-<div id="adminPanel" style="display:none; max-width:1000px; margin:auto;">
-    <div style="display:flex; gap:0.75rem; margin-bottom:1.5rem; flex-wrap:wrap;">
-        <button class="btn-save" onclick="tab('add')" style="flex:1;">Add Post</button>
-        <button class="btn-save" onclick="tab('man')" style="flex:1; background:#64748b;">Delete</button>
-        <button class="btn-save" onclick="tab('eps')" style="flex:1; background:#64748b;">Episodes</button>
-        <button class="btn-save" onclick="tab('sh')" style="flex:1; background:#64748b;">Shorteners</button>
-        <button class="btn-save" onclick="tab('pre')" style="flex:1; background:#64748b;">Premium</button>
-        <button class="btn-save" onclick="tab('pwd')" style="flex:1; background:#64748b;">Password</button>
+<div class="admin-container">
+    <h1 class="admin-title">👑 Hindi Sub Studio Control</h1>
+
+    <!-- LOGIN SECTION -->
+    <div id="loginBox" class="admin-box" style="max-width:400px; margin:auto;">
+        <h3>🔐 Admin Login</h3>
+        <input type="email" id="email" placeholder="Admin Email">
+        <input type="password" id="pass" placeholder="Password">
+        <button class="btn" onclick="login()">Login</button>
     </div>
 
-    <div id="add" class="widget adm-tab">
-        <h3>➕ New Post</h3>
-        <input id="aName" placeholder="Title" style="background:white;">
-        <input id="aGenre" placeholder="Genre" style="background:white;">
-        <input id="aDate" placeholder="Year" style="background:white;">
-        <select id="aType" style="background:white;">
-            <option>Short Video</option><option>Anime</option><option>K-Drama</option><option>Movie</option><option>Series</option>
-        </select>
-        <button onclick="uploadImage()" class="btn-save" style="background:#334155; margin-bottom:0.75rem;">🖼️ Upload Poster (Cloudinary)</button>
-        <input type="hidden" id="aImg">
-        <textarea id="aStory" rows="4" placeholder="Story (optional)" style="background:white;"></textarea>
-        <button class="btn-save" onclick="savePost()">Publish</button>
-    </div>
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboard" style="display:none;">
+        <button class="btn btn-red" onclick="logout()" style="width:auto; float:right; margin-bottom:15px;">Logout</button>
+        <div style="clear:both;"></div>
 
-    <div id="man" class="widget adm-tab" style="display:none;">
-        <h3>🗑️ Manage Posts</h3><div id="pList"></div>
-    </div>
+        <!-- TABS -->
+        <div class="tab-btns">
+            <button class="btn active" onclick="switchTab('addPost')">🎬 Add Post</button>
+            <button class="btn" onclick="switchTab('addEp')">📺 Episodes</button>
+            <button class="btn" onclick="switchTab('settings')">⚙️ Settings (Links & Pass)</button>
+            <button class="btn" onclick="switchTab('premium')">💎 Premium Tokens</button>
+        </div>
 
-    <div id="eps" class="widget adm-tab" style="display:none;">
-        <h3>📺 Episodes</h3>
-        <select id="selPost" onchange="loadEps()" style="background:white;"><option value="">Select Post</option></select>
-        <input id="eNum" type="number" placeholder="Episode No." style="background:white;">
-        <input id="eStream" placeholder="SeekStreaming Embed URL" style="background:white;">
-        <input id="eDl" placeholder="Direct Download Link" style="background:white;">
-        <button class="btn-save" onclick="saveEp()">Add Episode</button>
-        <hr style="border-color:var(--border); margin:1rem 0;">
-        <div id="curEps"></div>
-    </div>
+        <!-- 1. ADD POST TAB -->
+        <div id="addPost" class="admin-box tab-content">
+            <h3>🎬 Create New Anime/Series Post</h3>
+            <input id="pName" placeholder="Title (e.g., Solo Leveling)">
+            <div class="grid-2">
+                <select id="pType">
+                    <option value="Anime Hindi Sub">Anime Hindi Sub</option>
+                    <option value="Anime Hindi Dub">Anime Hindi Dub</option>
+                    <option value="K-Drama Hindi Sub">K-Drama Hindi Sub</option>
+                    <option value="K-Drama Hindi Dub">K-Drama Hindi Dub</option>
+                    <option value="Series Hindi Sub">Series Hindi Sub</option>
+                    <option value="Series Hindi Dub">Series Hindi Dub</option>
+                    <option value="Donghua Hindi Sub">Donghua Hindi Sub</option>
+                    <option value="Donghua Hindi Dub">Donghua Hindi Dub</option>
+                    <option value="Movie Hindi Sub">Movie Hindi Sub</option>
+                    <option value="Movie Hindi Dub">Movie Hindi Dub</option>
+                </select>
+                <input id="pGenre" placeholder="Genre (e.g., Action, Romance)">
+            </div>
+            <div class="grid-2">
+                <input id="pDate" placeholder="Release Year (e.g., 2024)">
+                <button type="button" class="btn" style="background:#333;" onclick="uploadPoster()">🖼️ Upload Poster</button>
+            </div>
+            <img id="previewImg" style="width:100px; border-radius:8px; display:none; margin-bottom:10px;">
+            <input type="hidden" id="pImg">
+            <textarea id="pStory" rows="4" placeholder="Storyline..."></textarea>
+            <button class="btn" onclick="savePost()">Publish Post</button>
+        </div>
 
-    <div id="sh" class="widget adm-tab" style="display:none;">
-        <h3>🔗 Shortener APIs (3)</h3>
-        <div style="display:flex; gap:0.5rem;"><input id="s1k" placeholder="API Key 1" style="background:white;"><input id="s1u" placeholder="Base URL 1" style="background:white;"></div>
-        <div style="display:flex; gap:0.5rem;"><input id="s2k" placeholder="API Key 2" style="background:white;"><input id="s2u" placeholder="Base URL 2" style="background:white;"></div>
-        <div style="display:flex; gap:0.5rem;"><input id="s3k" placeholder="API Key 3" style="background:white;"><input id="s3u" placeholder="Base URL 3" style="background:white;"></div>
-        <button class="btn-save" onclick="saveSh()" style="margin-top:0.5rem;">Save</button>
-    </div>
+        <!-- 2. ADD EPISODE TAB -->
+        <div id="addEp" class="admin-box tab-content" style="display:none;">
+            <h3>📺 Add Episodes & Links</h3>
+            <select id="epPostSelect" onchange="loadEpisodes()"><option value="">Select Anime/Show</option></select>
+            <div class="grid-2">
+                <input id="epNum" type="number" placeholder="Episode Number (e.g., 1)">
+                <input id="epLive" placeholder="Live Play Link (SeekStreaming)">
+            </div>
+            <input id="epDown" placeholder="Download Link (Telegram File Link)">
+            <button class="btn" onclick="saveEpisode()">Add Episode</button>
+            <h4 style="margin-top:20px; color:#ff4500;">Current Episodes:</h4>
+            <div id="epList"></div>
+        </div>
 
-    <div id="pre" class="widget adm-tab" style="display:none;">
-        <h3>💎 Generate Premium Token</h3>
-        <button class="btn-save" onclick="generateToken()" style="background:#16a34a;">Generate 28-Day Token</button>
-        <div id="newTokenDisplay" style="margin-top:1rem; font-weight:bold; font-size:1.1rem;"></div>
-    </div>
+        <!-- 3. SETTINGS TAB (Shortener & Password) -->
+        <div id="settings" class="admin-box tab-content" style="display:none;">
+            <h3>⚙️ Site Master Settings</h3>
+            
+            <h4 style="color:#ff4500; margin-bottom:10px;">🔒 Global Video Password</h4>
+            <input id="globalPass" placeholder="Set Password for Live Video Play">
+            
+            <h4 style="color:#ff4500; margin-top:20px; margin-bottom:10px;">🔗 Shortener Accounts (Rotation)</h4>
+            <div class="grid-2"><input id="s1u" placeholder="Shortener 1 URL"><input id="s1k" placeholder="API Key 1"></div>
+            <div class="grid-2"><input id="s2u" placeholder="Shortener 2 URL"><input id="s2k" placeholder="API Key 2"></div>
+            <div class="grid-2"><input id="s3u" placeholder="Shortener 3 URL"><input id="s3k" placeholder="API Key 3"></div>
+            
+            <button class="btn btn-green" onclick="saveSettings()">Save Master Settings</button>
+        </div>
 
-    <div id="pwd" class="widget adm-tab" style="display:none;">
-        <h3>🔑 Site Password (Video Unlock)</h3>
-        <input id="sitePass" placeholder="New password" style="background:white;">
-        <button class="btn-save" onclick="saveSitePassword()">Update</button>
-        <p style="font-size:0.8rem; color:var(--text-light); margin-top:0.5rem;">Share this password in your Telegram group (@hindisubanime_q).</p>
+        <!-- 4. PREMIUM TOKENS TAB -->
+        <div id="premium" class="admin-box tab-content" style="display:none;">
+            <h3>💎 Generate Premium User Token</h3>
+            <p style="font-size:12px; color:#aaa; margin-bottom:10px;">Give this token to VIP users. It locks to their phone automatically.</p>
+            <button class="btn btn-green" onclick="generateToken()">Generate 28-Days Token</button>
+            <div id="tokenDisplay" style="margin-top:15px; font-size:18px; font-weight:bold; color:var(--primary);"></div>
+        </div>
+
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, getDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
+    // ✅ YOUR EXACT FIREBASE CONFIG
     const firebaseConfig = {
         apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A",
         authDomain: "animesubstudio-256ec.firebaseapp.com",
@@ -88,93 +116,126 @@
         messagingSenderId: "439418566080",
         appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)
-        .then(() => { document.getElementById('loginBox').style.display='none'; document.getElementById('adminPanel').style.display='block'; loadPostList(); })
-        .catch(e => alert('Login failed: ' + e.message));
+    // -- AUTHENTICATION --
+    onAuthStateChanged(auth, user => {
+        if(user) {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            loadSelectPosts(); loadSettingsData();
+        } else {
+            document.getElementById('loginBox').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+    });
 
-    window.tab = (id) => {
-        document.querySelectorAll('.adm-tab').forEach(t => t.style.display='none');
-        document.getElementById(id).style.display='block';
-        if(id==='man') loadDelList();
+    window.login = () => { signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message)); };
+    window.logout = () => { signOut(auth); };
+
+    // -- TAB SWITCHER --
+    window.switchTab = (tabId) => {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.querySelectorAll('.tab-btns button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).style.display = 'block';
+        event.target.classList.add('active');
     };
 
-    window.uploadImage = () => cloudinary.openUploadWidget({
-        cloudName: "dccbzyjtr", uploadPreset: "asi_anime_upload"
-    }, (err, res) => { if(!err && res.event==="success") { document.getElementById('aImg').value = res.info.secure_url; alert('Poster uploaded!'); } });
+    // -- CLOUDINARY UPLOAD --
+    window.uploadPoster = () => {
+        cloudinary.openUploadWidget({ cloudName: "dccbzyjtr", uploadPreset: "asi_anime_upload" }, (err, res) => {
+            if(!err && res.event === "success") {
+                document.getElementById('pImg').value = res.info.secure_url;
+                document.getElementById('previewImg').src = res.info.secure_url;
+                document.getElementById('previewImg').style.display = "block";
+                alert("Poster Uploaded!");
+            }
+        });
+    };
 
+    // -- SAVE POST --
     window.savePost = async () => {
-        const n=document.getElementById('aName').value, g=document.getElementById('aGenre').value,
-              d=document.getElementById('aDate').value, t=document.getElementById('aType').value,
-              s=document.getElementById('aStory').value, i=document.getElementById('aImg').value;
-        if(!n||!i) return alert('Title and image required!');
-        await addDoc(collection(db,"posts"),{name:n,genre:g,date:d,type:t,story:s,image:i,createdAt:Date.now()});
-        alert('Published!'); loadPostList();
+        const name = document.getElementById('pName').value;
+        const img = document.getElementById('pImg').value;
+        if(!name || !img) return alert("Name and Poster are required!");
+        
+        await addDoc(collection(db, "posts"), {
+            name: name, type: document.getElementById('pType').value,
+            genre: document.getElementById('pGenre').value, date: document.getElementById('pDate').value,
+            story: document.getElementById('pStory').value, image: img, createdAt: Date.now()
+        });
+        alert("Post Published!"); location.reload();
     };
 
-    async function loadPostList() {
-        const snap = await getDocs(collection(db,"posts"));
-        const sel = document.getElementById('selPost');
-        sel.innerHTML = '<option value="">Select Post</option>';
-        snap.forEach(d => sel.innerHTML += `<option value="${d.id}">${d.data().name}</option>`);
-    }
-
-    window.loadDelList = async () => {
-        const snap = await getDocs(query(collection(db,"posts"), orderBy("createdAt","desc")));
-        document.getElementById('pList').innerHTML = snap.docs.map(d => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem; border:1px solid var(--border); border-radius:8px; margin-bottom:0.25rem; background:white;">
-                ${d.data().name}
-                <button onclick="delPost('${d.id}')" style="background:#e11d48; color:white; border:none; padding:0.25rem 1rem; border-radius:6px; cursor:pointer;">Delete</button>
-            </div>`).join('');
+    // -- LOAD POSTS FOR EPISODES --
+    window.loadSelectPosts = async () => {
+        const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
+        const sel = document.getElementById('epPostSelect');
+        sel.innerHTML = '<option value="">Select Anime/Show</option>';
+        snap.forEach(d => sel.innerHTML += `<option value="${d.id}">${d.data().name} (${d.data().type})</option>`);
     };
 
-    window.delPost = async (id) => { if(confirm('Delete?')) { await deleteDoc(doc(db,"posts",id)); loadDelList(); loadPostList(); } };
-
-    window.saveEp = async () => {
-        const pid=document.getElementById('selPost').value, num=document.getElementById('eNum').value,
-              stream=document.getElementById('eStream').value, dl=document.getElementById('eDl').value;
-        if(!pid||!num||!stream) return alert('Fill all fields!');
-        await addDoc(collection(db,"episodes"),{postId:pid,num,stream,download:dl});
-        alert('Episode added!'); loadEps();
+    // -- SAVE EPISODE --
+    window.saveEpisode = async () => {
+        const postId = document.getElementById('epPostSelect').value;
+        if(!postId) return alert("Select a post first!");
+        await addDoc(collection(db, "episodes"), {
+            postId: postId, num: document.getElementById('epNum').value,
+            live: document.getElementById('epLive').value, down: document.getElementById('epDown').value
+        });
+        alert("Episode Added!"); loadEpisodes();
     };
 
-    window.loadEps = async () => {
-        const pid = document.getElementById('selPost').value;
-        if(!pid) return;
-        const snap = await getDocs(query(collection(db,"episodes"), where("postId","==",pid)));
-        document.getElementById('curEps').innerHTML = snap.docs.map(e => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.5rem; border:1px solid var(--border); border-radius:6px; margin-bottom:0.25rem; background:white;">
-                Ep ${e.data().num}
-                <button onclick="delEp('${e.id}')" style="background:#e11d48; color:white; border:none; padding:0.2rem 0.8rem; border-radius:4px; cursor:pointer;">X</button>
-            </div>`).join('');
+    window.loadEpisodes = async () => {
+        const postId = document.getElementById('epPostSelect').value;
+        if(!postId) return;
+        const snap = await getDocs(query(collection(db, "episodes"), where("postId", "==", postId)));
+        let html = "";
+        snap.forEach(d => {
+            html += `<div class="list-item">Ep ${d.data().num} <button class="btn btn-red" style="width:auto; padding:5px 10px;" onclick="delEp('${d.id}')">Delete</button></div>`;
+        });
+        document.getElementById('epList').innerHTML = html;
     };
+    window.delEp = async (id) => { await deleteDoc(doc(db, "episodes", id)); loadEpisodes(); };
 
-    window.delEp = async (id) => { await deleteDoc(doc(db,"episodes",id)); loadEps(); };
-
-    window.saveSh = async () => {
+    // -- MASTER SETTINGS (Password & Shortener) --
+    window.saveSettings = async () => {
         const list = [
-            { key: document.getElementById('s1k').value, url: document.getElementById('s1u').value },
-            { key: document.getElementById('s2k').value, url: document.getElementById('s2u').value },
-            { key: document.getElementById('s3k').value, url: document.getElementById('s3u').value }
-        ].filter(x => x.key);
-        await setDoc(doc(db,"settings","shorteners"), { list });
-        alert('Saved!');
+            {url: document.getElementById('s1u').value, key: document.getElementById('s1k').value},
+            {url: document.getElementById('s2u').value, key: document.getElementById('s2k').value},
+            {url: document.getElementById('s3u').value, key: document.getElementById('s3k').value}
+        ].filter(x => x.key && x.url);
+
+        await setDoc(doc(db, "settings", "main"), {
+            globalPassword: document.getElementById('globalPass').value,
+            shorteners: list
+        });
+        alert("Master Settings Saved Successfully!");
     };
 
+    window.loadSettingsData = async () => {
+        const snap = await getDoc(doc(db, "settings", "main"));
+        if(snap.exists()) {
+            const data = snap.data();
+            document.getElementById('globalPass').value = data.globalPassword || "";
+            if(data.shorteners[0]) { document.getElementById('s1u').value = data.shorteners[0].url; document.getElementById('s1k').value = data.shorteners[0].key; }
+            if(data.shorteners[1]) { document.getElementById('s2u').value = data.shorteners[1].url; document.getElementById('s2k').value = data.shorteners[1].key; }
+            if(data.shorteners[2]) { document.getElementById('s3u').value = data.shorteners[2].url; document.getElementById('s3k').value = data.shorteners[2].key; }
+        }
+    };
+
+    // -- GENERATE PREMIUM TOKEN --
     window.generateToken = async () => {
-        const token = "ASI-" + Math.random().toString(36).substr(2,6).toUpperCase();
-        await addDoc(collection(db,"premium"),{ token, lockedDevice:null, expiry: Date.now()+28*24*60*60*1000 });
-        document.getElementById('newTokenDisplay').innerText = `Token: ${token}`;
-    };
-
-    window.saveSitePassword = async () => {
-        const p = document.getElementById('sitePass').value.trim();
-        if(!p) return alert('Enter password!');
-        await setDoc(doc(db,"settings","sitePassword"), { password: p });
-        alert('Site password updated!');
+        const token = "HSS-" + Math.random().toString(36).substr(2, 8).toUpperCase();
+        await addDoc(collection(db, "premium"), {
+            token: token,
+            lockedDevice: null,
+            expiry: Date.now() + (28 * 24 * 60 * 60 * 1000) // 28 Days
+        });
+        document.getElementById('tokenDisplay').innerText = `Copy Token: ${token}`;
     };
 </script>
 </body>
