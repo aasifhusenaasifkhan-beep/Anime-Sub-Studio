@@ -1,33 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;800&display=swap');
 
 :root {
-    --bg: #09090b; --card: #15151a; --primary: #ff4500; --primary-hover: #e63e00; 
-    --text: #ffffff; --text-dim: #a1a1aa; --border: rgba(255,255,255,0.08);
+    --bg-dark: #09090b; --card-bg: #15151a; --primary: #ff4500; --primary-hover: #ff6a33;
+    --text-light: #ffffff; --text-muted: #a1a1aa;
 }
+
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; transition: 0.2s; }
-body { background: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 80px; }
+body { background-color: var(--bg-dark); color: var(--text-light); padding-bottom: 80px; overflow-x: hidden; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-/* Buttons & Inputs */
-input, select, textarea { width: 100%; background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 8px; color: white; margin-bottom: 12px; outline: none; }
-input:focus, select:focus, textarea:focus { border-color: var(--primary); }
-.btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 14px; }
-.btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
-.btn-red { background: #dc2626; } .btn-red:hover { background: #b91c1c; }
+header { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(15, 15, 19, 0.85); backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.logo { font-size: 26px; font-weight: 800; color: var(--text-light); text-decoration: none; }
+.logo span { color: var(--primary); }
+.search-box input { padding: 12px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; width: 300px; outline: none; font-size: 14px; }
+.search-box input:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); }
+
+.filter-container { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 5%; justify-content: center; }
+.filter-container button { padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: var(--card-bg); color: var(--text-muted); cursor: pointer; font-size: 13px; font-weight: 600; }
+.filter-container button.active, .filter-container button:hover { background: var(--primary); border-color: var(--primary); color: white; }
+
+.anime-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 0 5% 40px; }
+.anime-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid rgba(255,255,255,0.03); position: relative; }
+.anime-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+.anime-card img { width: 100%; height: 240px; object-fit: cover; }
+.badge-type { position: absolute; top: 10px; left: 10px; color: white; padding: 4px 10px; font-size: 10px; font-weight: 800; border-radius: 20px; background: var(--primary); }
+.anime-info { padding: 12px; }
+.anime-info h4 { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Detail & Player Area */
+.detail-container { max-width: 1000px; margin: 30px auto; padding: 30px; background: var(--card-bg); border-radius: 20px; display: flex; gap: 30px; border: 1px solid rgba(255,255,255,0.05); }
+.detail-img { width: 250px; height: 350px; border-radius: 15px; object-fit: cover; }
+.detail-info { flex: 1; }
+.ep-btn { background: rgba(255,255,255,0.05); color: white; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); font-size: 14px; font-weight: 600; }
+.ep-btn:hover { background: var(--primary); border-color: var(--primary); }
+
+.player-box { background: #000; padding: 20px; border-radius: 15px; margin-top: 30px; border: 1px solid var(--border); display: none; }
+iframe { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 10px; }
+.download-box { margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 15px; }
+.btn-main { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 14px; }
+.btn-main:hover { background: var(--primary-hover); }
 .btn-green { background: #16a34a; } .btn-green:hover { background: #15803d; }
 
-/* Admin Panel Specific */
-.admin-container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-.admin-title { text-align: center; color: var(--primary); font-size: 28px; font-weight: 800; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;}
-.admin-box { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.admin-box h3 { color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.tab-btns { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}
-.tab-btns button { width: auto; flex: 1; background: #222; border: 1px solid var(--border); }
-.tab-btns button.active { background: var(--primary); border-color: var(--primary); }
-
-.list-item { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid var(--primary); }
+.social-footer { position: fixed; bottom: 0; width: 100%; background: rgba(15, 15, 19, 0.95); display: flex; justify-content: center; gap: 15px; padding: 12px 5%; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); }
+.social-footer a { text-decoration: none; color: white; font-weight: 600; font-size: 13px; padding: 10px 22px; border-radius: 30px; }
+@media (max-width: 768px) { .detail-container { flex-direction: column; align-items: center; text-align: center; } .detail-img { width: 200px; height: 280px; } }
