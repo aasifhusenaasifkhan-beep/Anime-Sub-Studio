@@ -6,36 +6,39 @@
     <title>Master Admin | Hindi Sub Studio</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+    <style>
+        .admin-box { background: var(--card-bg); padding: 30px; border-radius: 15px; margin: 20px auto; max-width: 800px; border: 1px solid var(--border); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .tab-btns { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; }
+        .tab-btns button { width: auto; background: #222; border: 1px solid #444; }
+        .tab-btns button.active { background: var(--primary); border-color: var(--primary); }
+    </style>
 </head>
-<body>
+<body style="padding:20px;">
 
-<div class="admin-container">
-    <h1 class="admin-title">👑 Master Admin Panel</h1>
+    <h1 style="text-align:center; color:var(--primary);">👑 Master Admin Panel</h1>
 
-    <!-- LOGIN -->
-    <div id="loginBox" class="admin-box" style="max-width:400px; margin:auto;">
-        <h3>🔐 Admin Login</h3>
-        <input type="email" id="email" placeholder="Admin Email">
+    <div id="loginBox" class="admin-box" style="max-width:400px;">
+        <h3 style="text-align:center;">Admin Login</h3><br>
+        <input type="email" id="email" placeholder="Email">
         <input type="password" id="pass" placeholder="Password">
-        <button class="btn" onclick="login()">Login</button>
+        <button class="btn-main" onclick="login()">Login</button>
     </div>
 
-    <!-- DASHBOARD -->
     <div id="dashboard" style="display:none;">
-        <button class="btn btn-red" onclick="logout()" style="width:auto; float:right; margin-bottom:15px;">Logout</button>
+        <button class="btn-main" style="width:auto; background:red; float:right;" onclick="logout()">Logout</button>
         <div style="clear:both;"></div>
 
         <div class="tab-btns">
-            <button class="btn active" onclick="switchTab('addPost')">🎬 Add Post</button>
-            <button class="btn" onclick="switchTab('addEp')">📺 Episodes</button>
-            <button class="btn" onclick="switchTab('settings')">⚙️ Settings</button>
-            <button class="btn" onclick="switchTab('premium')">💎 Premium VIP</button>
+            <button class="btn-main active" onclick="tab('addPost')">🎬 Add Post</button>
+            <button class="btn-main" onclick="tab('addEp')">📺 Episodes</button>
+            <button class="btn-main" onclick="tab('settings')">⚙️ Settings</button>
+            <button class="btn-main" onclick="tab('premium')">💎 Premium</button>
         </div>
 
-        <!-- ADD POST -->
         <div id="addPost" class="admin-box tab-content">
-            <h3>🎬 Create New Post</h3>
-            <input id="pName" placeholder="Name (e.g., Solo Leveling)">
+            <h3>Add New Show</h3><br>
+            <input id="pName" placeholder="Name">
             <div class="grid-2">
                 <select id="pType">
                     <option value="Anime Hindi Sub">Anime Hindi Sub</option>
@@ -51,51 +54,46 @@
                     <option value="Movie Hindi Sub">Movie Hindi Sub</option>
                     <option value="Movie Hindi Dub">Movie Hindi Dub</option>
                 </select>
-                <input id="pGenre" placeholder="Genre (e.g., Action, Romance)">
+                <input id="pGenre" placeholder="Genre (e.g., Action)">
             </div>
             <div class="grid-2">
                 <input id="pDate" placeholder="Release Year">
-                <button type="button" class="btn" style="background:#333;" onclick="uploadPoster()">🖼️ Upload Poster</button>
+                <button class="btn-main" style="background:#444;" onclick="uploadPoster()">🖼️ Upload Poster</button>
             </div>
             <input type="hidden" id="pImg">
-            <textarea id="pStory" rows="4" placeholder="Storyline..."></textarea>
-            <button class="btn" onclick="savePost()">Publish Post</button>
+            <textarea id="pStory" rows="4" placeholder="Storyline"></textarea>
+            <button class="btn-main" onclick="savePost()">Save Post</button>
         </div>
 
-        <!-- ADD EPISODE -->
         <div id="addEp" class="admin-box tab-content" style="display:none;">
-            <h3>📺 Manage Episodes</h3>
-            <select id="epPostSelect" onchange="loadEpisodes()"><option value="">Select Show...</option></select>
+            <h3>Manage Episodes</h3><br>
+            <select id="epPostSelect" onchange="loadEps()"><option value="">Select Show...</option></select>
             <div class="grid-2">
-                <input id="epNum" type="number" placeholder="Episode Number">
-                <input id="epLive" placeholder="⚠️ ONLY SeekStreaming Link (Live Video)">
+                <input id="epNum" type="number" placeholder="Episode No.">
+                <input id="epLive" placeholder="SeekStreaming Live Link">
             </div>
-            <input id="epDown" placeholder="📥 Telegram Direct File Link (Download)">
-            <button class="btn" onclick="saveEpisode()">Save Episode</button>
-            <h4 style="margin-top:20px;">Added Episodes:</h4>
-            <div id="epList"></div>
+            <input id="epDown" placeholder="Telegram Download Link">
+            <button class="btn-main" onclick="saveEp()">Add Episode</button>
+            <div id="epList" style="margin-top:20px;"></div>
         </div>
 
-        <!-- SETTINGS -->
         <div id="settings" class="admin-box tab-content" style="display:none;">
-            <h3>⚙️ Site Settings</h3>
-            <input id="globalPass" placeholder="Set Password for Live Video Player">
-            <h4 style="color:#ff4500; margin-top:20px;">🔗 URL Shortener Accounts (Rotation)</h4>
-            <p style="font-size:12px; color:gray;">Base URL MUST include '/api' (e.g., https://shrinkme.io/api)</p>
-            <div class="grid-2"><input id="s1u" placeholder="Base URL 1"><input id="s1k" placeholder="API Key 1"></div>
-            <div class="grid-2"><input id="s2u" placeholder="Base URL 2"><input id="s2k" placeholder="API Key 2"></div>
-            <div class="grid-2"><input id="s3u" placeholder="Base URL 3"><input id="s3k" placeholder="API Key 3"></div>
-            <button class="btn btn-green" onclick="saveSettings()">Save Configuration</button>
+            <h3>Settings</h3><br>
+            <label style="color:#aaa;">Global Video Password</label>
+            <input id="globalPass" placeholder="e.g. anime24">
+            
+            <h4 style="margin-top:20px;">Shortener APIs</h4>
+            <div class="grid-2"><input id="s1u" placeholder="Shortener URL (e.g. shrinkme.io)"><input id="s1k" placeholder="API Key"></div>
+            <div class="grid-2"><input id="s2u" placeholder="Shortener URL 2"><input id="s2k" placeholder="API Key 2"></div>
+            <button class="btn-main btn-green" onclick="saveSettings()">Save Settings</button>
         </div>
 
-        <!-- PREMIUM -->
         <div id="premium" class="admin-box tab-content" style="display:none;">
-            <h3>💎 Generate Premium VIP Token</h3>
-            <button class="btn btn-green" onclick="generateToken()">Generate 28-Days Token</button>
-            <div id="tokenDisplay" style="margin-top:15px; font-size:18px; color:var(--primary);"></div>
+            <h3>Generate VIP Token</h3><br>
+            <button class="btn-main btn-green" onclick="generateToken()">Generate Token</button>
+            <h2 id="tokenDisplay" style="text-align:center; color:gold; margin-top:20px;"></h2>
         </div>
     </div>
-</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
@@ -105,78 +103,23 @@
     const app = initializeApp({ apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com", projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app", messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425" });
     const db = getFirestore(app); const auth = getAuth(app);
 
-    onAuthStateChanged(auth, user => {
-        if(user) { document.getElementById('loginBox').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; loadSelectPosts(); loadSettingsData(); }
-        else { document.getElementById('loginBox').style.display = 'block'; document.getElementById('dashboard').style.display = 'none'; }
-    });
-    window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(e => alert(e.message));
+    onAuthStateChanged(auth, u => { if(u) { document.getElementById('loginBox').style.display='none'; document.getElementById('dashboard').style.display='block'; loadSelect(); loadSet(); } else { document.getElementById('loginBox').style.display='block'; document.getElementById('dashboard').style.display='none'; } });
+    window.login = () => signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value).catch(e=>alert(e.message));
     window.logout = () => signOut(auth);
-    window.switchTab = (id) => { document.querySelectorAll('.tab-content').forEach(t => t.style.display='none'); document.querySelectorAll('.tab-btns button').forEach(b => b.classList.remove('active')); document.getElementById(id).style.display='block'; event.target.classList.add('active'); };
+    window.tab = (id) => { document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none'); document.querySelectorAll('.tab-btns button').forEach(b=>b.classList.remove('active')); document.getElementById(id).style.display='block'; event.target.classList.add('active'); };
 
-    window.uploadPoster = () => {
-        cloudinary.openUploadWidget({ cloudName: "dccbzyjtr", uploadPreset: "asi_anime_upload" }, (err, res) => {
-            if(!err && res.event === "success") { document.getElementById('pImg').value = res.info.secure_url; alert("Poster Saved!"); }
-        });
-    };
+    window.uploadPoster = () => cloudinary.openUploadWidget({ cloudName: "dccbzyjtr", uploadPreset: "asi_anime_upload" }, (err, res) => { if(!err && res.event === "success") { document.getElementById('pImg').value = res.info.secure_url; alert("Poster Done!"); } });
+    
+    window.savePost = async () => { await addDoc(collection(db, "posts"), { name: document.getElementById('pName').value, type: document.getElementById('pType').value, genre: document.getElementById('pGenre').value, date: document.getElementById('pDate').value, story: document.getElementById('pStory').value, image: document.getElementById('pImg').value, createdAt: Date.now() }); alert("Saved!"); location.reload(); };
+    window.loadSelect = async () => { const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"))); document.getElementById('epPostSelect').innerHTML = '<option value="">Select Show...</option>' + snap.docs.map(d=>`<option value="${d.id}">${d.data().name} (${d.data().type})</option>`).join(''); };
+    
+    window.saveEp = async () => { await addDoc(collection(db, "episodes"), { postId: document.getElementById('epPostSelect').value, num: document.getElementById('epNum').value, live: document.getElementById('epLive').value, down: document.getElementById('epDown').value }); alert("Episode Added!"); loadEps(); };
+    window.loadEps = async () => { const snap = await getDocs(query(collection(db, "episodes"), where("postId", "==", document.getElementById('epPostSelect').value))); document.getElementById('epList').innerHTML = snap.docs.map(d=>`<div style="padding:10px; border:1px solid #444; margin-bottom:5px;">Ep ${d.data().num} <button style="background:red; color:white; border:none; padding:5px; float:right;" onclick="delEp('${d.id}')">Del</button></div>`).join(''); };
+    window.delEp = async (id) => { await deleteDoc(doc(db, "episodes", id)); loadEps(); };
 
-    window.savePost = async () => {
-        await addDoc(collection(db, "posts"), { name: document.getElementById('pName').value, type: document.getElementById('pType').value, genre: document.getElementById('pGenre').value, date: document.getElementById('pDate').value, story: document.getElementById('pStory').value, image: document.getElementById('pImg').value, createdAt: Date.now() });
-        alert("Post Added!"); location.reload();
-    };
-
-    window.loadSelectPosts = async () => {
-        const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
-        document.getElementById('epPostSelect').innerHTML = '<option value="">Select Show...</option>' + snap.docs.map(d => `<option value="${d.id}">${d.data().name} (${d.data().type})</option>`).join('');
-    };
-
-    window.saveEpisode = async () => {
-        await addDoc(collection(db, "episodes"), { postId: document.getElementById('epPostSelect').value, num: document.getElementById('epNum').value, live: document.getElementById('epLive').value, down: document.getElementById('epDown').value });
-        alert("Episode Added!"); loadEpisodes();
-    };
-
-    window.loadEpisodes = async () => {
-        const postId = document.getElementById('epPostSelect').value;
-        const snap = await getDocs(query(collection(db, "episodes"), where("postId", "==", postId)));
-        let arr = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => a.num - b.num);
-        document.getElementById('epList').innerHTML = arr.map(ep => `<div style="padding:10px; border:1px solid #333; margin-bottom:5px;">Ep ${ep.num} <button style="background:red; color:white; border:none; padding:5px; float:right;" onclick="delEp('${ep.id}')">Delete</button></div>`).join('');
-    };
-    window.delEp = async (id) => { await deleteDoc(doc(db, "episodes", id)); loadEpisodes(); };
-
-    // Format Shortener URL function
-    function formatUrl(url) {
-        if(!url) return "";
-        let finalUrl = url.trim();
-        if(!finalUrl.startsWith('http')) finalUrl = 'https://' + finalUrl;
-        if(!finalUrl.endsWith('/api')) finalUrl += '/api';
-        return finalUrl;
-    }
-
-    window.saveSettings = async () => {
-        const list =[
-            {url: formatUrl(document.getElementById('s1u').value), key: document.getElementById('s1k').value},
-            {url: formatUrl(document.getElementById('s2u').value), key: document.getElementById('s2k').value},
-            {url: formatUrl(document.getElementById('s3u').value), key: document.getElementById('s3k').value}
-        ].filter(x => x.key && x.url);
-
-        await setDoc(doc(db, "settings", "main"), { globalPassword: document.getElementById('globalPass').value, shorteners: list });
-        alert("Settings Saved!");
-    };
-
-    window.loadSettingsData = async () => {
-        const snap = await getDoc(doc(db, "settings", "main"));
-        if(snap.exists()) {
-            const d = snap.data();
-            document.getElementById('globalPass').value = d.globalPassword || "";
-            if(d.shorteners[0]){ document.getElementById('s1u').value = d.shorteners[0].url; document.getElementById('s1k').value = d.shorteners[0].key; }
-            if(d.shorteners[1]){ document.getElementById('s2u').value = d.shorteners[1].url; document.getElementById('s2k').value = d.shorteners[1].key; }
-        }
-    };
-
-    window.generateToken = async () => {
-        const t = "VIP-" + Math.random().toString(36).substr(2, 8).toUpperCase();
-        await addDoc(collection(db, "premium"), { token: t, lockedDevice: null, expiry: Date.now()+(28*86400000) });
-        document.getElementById('tokenDisplay').innerText = t;
-    };
+    window.saveSettings = async () => { await setDoc(doc(db, "settings", "main"), { globalPassword: document.getElementById('globalPass').value, shorteners:[{url: document.getElementById('s1u').value, key: document.getElementById('s1k').value}, {url: document.getElementById('s2u').value, key: document.getElementById('s2k').value}].filter(x=>x.key) }); alert("Settings Saved!"); };
+    window.loadSet = async () => { const snap = await getDoc(doc(db, "settings", "main")); if(snap.exists()) { const d = snap.data(); document.getElementById('globalPass').value = d.globalPassword||""; if(d.shorteners[0]){document.getElementById('s1u').value=d.shorteners[0].url; document.getElementById('s1k').value=d.shorteners[0].key;} if(d.shorteners[1]){document.getElementById('s2u').value=d.shorteners[1].url; document.getElementById('s2k').value=d.shorteners[1].key;} } };
+    window.generateToken = async () => { const t = "VIP-"+Math.random().toString(36).substr(2,6).toUpperCase(); await addDoc(collection(db, "premium"), { token: t, lockedDevice: null, expiry: Date.now()+(28*86400000) }); document.getElementById('tokenDisplay').innerText = t; };
 </script>
 </body>
 </html>
