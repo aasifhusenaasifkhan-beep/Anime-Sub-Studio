@@ -2,41 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hindi Sub Studio | Free Anime & K-Drama</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: var(--card); border-bottom: 1px solid var(--border); }
-        .logo { font-size: 24px; font-weight: 900; color: var(--primary); text-decoration: none; }
-        .search-bar { width: 350px; padding: 12px; border-radius: 20px; background: #000; border: 1px solid var(--border); color: white; outline: none; }
-        
-        /* Rare Toons Style Filter Bar */
-        .filters-wrapper { background: #111; padding: 15px 5%; border-bottom: 1px solid var(--border); }
-        .filters { display: flex; gap: 10px; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
-        .filters::-webkit-scrollbar { height: 4px; }
-        .filters button { background: #222; border: 1px solid #333; color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .filters button.active, .filters button:hover { background: var(--primary); border-color: var(--primary); }
-        
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 30px 5%; }
-        .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; border: 1px solid var(--border); position: relative; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .card img { width: 100%; height: 250px; object-fit: cover; }
-        .card-info { padding: 12px; }
-        .card-info h4 { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
-        .badge { position: absolute; top: 10px; left: 10px; font-size: 10px; background: var(--primary); padding: 4px 8px; border-radius: 5px; font-weight: bold; }
-    </style>
 </head>
 <body>
 
-<header>
-    <a href="index.html" class="logo">HINDI SUB <span>STUDIO</span></a>
-    <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Deep Search by Name or Genre...">
-</header>
+    <header>
+        <a href="index.html" class="logo">HINDI SUB <span>STUDIO</span></a>
+        <div class="search-box">
+            <input id="searchInput" placeholder="Search Anime, K-Drama, Movies...">
+        </div>
+    </header>
 
-<div class="filters-wrapper">
-    <div class="filters">
-        <button class="active" onclick="filterData('All', this)">All Updates</button>
+    <!-- SAARI 12 CATEGORIES -->
+    <div class="filter-container">
+        <button onclick="filterData('All', this)" class="active">All Updates</button>
         <button onclick="filterData('Anime Hindi Sub', this)">Anime Hindi Sub</button>
         <button onclick="filterData('Anime Hindi Dub', this)">Anime Hindi Dub</button>
         <button onclick="filterData('Anime English Sub', this)">Anime English Sub</button>
@@ -50,54 +31,60 @@
         <button onclick="filterData('Movie Hindi Sub', this)">Movie Hindi Sub</button>
         <button onclick="filterData('Movie Hindi Dub', this)">Movie Hindi Dub</button>
     </div>
-</div>
 
-<div class="grid" id="postGrid">
-    <h3 style="color:white; text-align:center; width:100%;">Loading Data...</h3>
-</div>
+    <main id="animeList" class="anime-list">
+        <h3 style="color:var(--primary); text-align:center; width:100%;">Loading...</h3>
+    </main>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    <div class="social-footer">
+        <a href="https://t.me/hindisubinganime" target="_blank" style="background:#0088cc;">Telegram Channel</a>
+        <a href="https://t.me/hindisubanime_q" target="_blank" style="background:#333;">Discussion Group</a>
+    </div>
 
-    const app = initializeApp({
-        apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com",
-        projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app",
-        messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
-    });
-    const db = getFirestore(app);
-    let allData =[];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-    async function load() {
-        const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
-        allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        render(allData);
-    }
+        const app = initializeApp({
+            apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com",
+            projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app",
+            messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
+        });
+        const db = getFirestore(app);
+        let allData =[];
 
-    function render(list) {
-        if(list.length === 0) return document.getElementById('postGrid').innerHTML = "<p style='color:#aaa; text-align:center; width:100%;'>No posts found.</p>";
-        document.getElementById('postGrid').innerHTML = list.map(p => `
-            <div class="card" onclick="location.href='detail.html?id=${p.id}'">
-                <span class="badge">${p.type}</span>
-                <img src="${p.image}" loading="lazy">
-                <div class="card-info">
-                    <h4>${p.name}</h4>
-                    <span style="font-size:11px; color:gray;">${p.genre} | ${p.date}</span>
+        async function load() {
+            const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
+            allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            render(allData);
+        }
+
+        function render(list) {
+            const box = document.getElementById("animeList");
+            if(list.length === 0) return box.innerHTML = "<p style='width:100%; text-align:center;'>No Content Found.</p>";
+            box.innerHTML = list.map(a => `
+                <div class="anime-card" onclick="location.href='detail.html?id=${a.id}'">
+                    <div class="badge-type">${a.type}</div>
+                    <img src="${a.image}" loading="lazy">
+                    <div class="anime-info">
+                        <h4>${a.name}</h4>
+                        <span style="font-size:12px; color:gray;">${a.genre} | ${a.date}</span>
+                    </div>
                 </div>
-            </div>
-        `).join('');
-    }
+            `).join('');
+        }
 
-    window.filterData = (type, btn) => {
-        document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-        render(type === 'All' ? allData : allData.filter(p => p.type === type));
-    };
+        window.filterData = (type, btn) => {
+            document.querySelectorAll(".filter-container button").forEach(b => b.classList.remove("active")); btn.classList.add("active");
+            render(type === 'All' ? allData : allData.filter(a => a.type === type));
+        };
 
-    document.getElementById('searchInput').oninput = (e) => {
-        const val = e.target.value.toLowerCase();
-        render(allData.filter(p => p.name.toLowerCase().includes(val) || p.genre.toLowerCase().includes(val)));
-    };
-    load();
-</script>
+        document.getElementById("searchInput").addEventListener("input", e => {
+            const val = e.target.value.toLowerCase();
+            render(allData.filter(a => a.name.toLowerCase().includes(val) || a.genre.toLowerCase().includes(val)));
+        });
+
+        load();
+    </script>
 </body>
 </html>
