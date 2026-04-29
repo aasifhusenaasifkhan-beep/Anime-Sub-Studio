@@ -3,136 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Sub Studio | Watch Hindi Subbed Anime & More</title>
-    <meta name="description" content="Anime Sub Studio - Watch Hindi Subbed & Dubbed Anime, K-Dramas, Movies & Web Series for free. High quality streaming and fast updates.">
-    <meta name="keywords" content="anime hindi sub, anime hindi dub, korean drama hindi, hindi subbed anime, anime sub studio, free anime streaming, हिंदी एनीमे">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://animesubstudio-256ec.web.app/">
-    <meta property="og:title" content="Anime Sub Studio | Watch Hindi Subbed Anime & K-Dramas">
-    <meta property="og:description" content="Your hub for Hindi Subbed & Dubbed Anime, K-Dramas, Movies & Web Series.">
-    <meta property="og:url" content="https://animesubstudio-256ec.web.app/">
-    <meta property="og:type" content="website">
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Anime Sub Studio",
-        "url": "https://animesubstudio-256ec.web.app/",
-        "description": "Best site for Hindi Subbed Anime, K-Dramas, Movies & Web Series.",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://animesubstudio-256ec.web.app/?search={search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
-    }
-    </script>
+    <title>Hindi Sub Studio | Watch Anime & K-Drama</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: var(--card); border-bottom: 1px solid var(--border); }
+        .logo { font-size: 24px; font-weight: 800; color: var(--primary); text-decoration: none; }
+        .search-bar { width: 300px; }
+        .filters { display: flex; gap: 10px; padding: 20px 5%; overflow-x: auto; white-space: nowrap; }
+        .filters button { background: var(--card); border: 1px solid var(--border); color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+        .filters button.active, .filters button:hover { background: var(--primary); border-color: var(--primary); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 0 5%; }
+        .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; border: 1px solid var(--border); }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .card img { width: 100%; height: 240px; object-fit: cover; }
+        .card-info { padding: 12px; }
+        .card-info h4 { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .badge { font-size: 10px; background: var(--primary); padding: 3px 8px; border-radius: 5px; display: inline-block; margin-top: 5px; }
+    </style>
 </head>
 <body>
+
 <header>
-    <a href="index.html" class="logo">ANIME <span>SUB STUDIO</span></a>
-    <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="mainSearch" placeholder="Search anime, drama, movies...">
-    </div>
+    <a href="index.html" class="logo">HINDI SUB <span>STUDIO</span></a>
+    <input type="text" id="searchInput" class="search-bar" placeholder="Deep Search Anime, K-Drama..." style="margin:0;">
 </header>
 
-<div class="master-layout">
-    <aside class="sidebar">
-        <div class="widget">
-            <div class="widget-title">Categories</div>
-            <div id="catList">
-                <button class="cat-btn active" onclick="filterData('All', this)">All Updates</button>
-                <button class="cat-btn" onclick="filterData('Short Video', this)">Short Videos</button>
-                <button class="cat-btn" onclick="filterData('Anime', this)">Anime</button>
-                <button class="cat-btn" onclick="filterData('K-Drama', this)">K-Dramas</button>
-                <button class="cat-btn" onclick="filterData('Movie', this)">Movies</button>
-                <button class="cat-btn" onclick="filterData('Series', this)">Web Series</button>
-            </div>
-        </div>
-        <div class="widget">
-            <div class="widget-title">A-Z Directory</div>
-            <div class="az-grid" id="azGrid">
-                <button class="az-btn active" onclick="filterLetter('All', this)">ALL</button>
-                <button class="az-btn" onclick="filterLetter('0-9', this)">0-9</button>
-            </div>
-        </div>
-    </aside>
-    <main class="main-view">
-        <div class="anime-grid" id="gridDisplay"></div>
-    </main>
+<div class="filters">
+    <button class="active" onclick="filterType('All', this)">All</button>
+    <button onclick="filterType('Anime Hindi Sub', this)">Anime Sub</button>
+    <button onclick="filterType('Anime Hindi Dub', this)">Anime Dub</button>
+    <button onclick="filterType('K-Drama', this)">K-Drama</button>
+    <button onclick="filterType('Series', this)">Web Series</button>
+    <button onclick="filterType('Donghua', this)">Donghua</button>
+    <button onclick="filterType('Movie', this)">Movies</button>
 </div>
 
-<div class="social-footer">
-    <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Join Channel</a>
-    <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Discussion</a>
-</div>
+<div class="grid" id="postGrid"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A",
-        authDomain: "animesubstudio-256ec.firebaseapp.com",
-        projectId: "animesubstudio-256ec",
-        storageBucket: "animesubstudio-256ec.firebasestorage.app",
-        messagingSenderId: "439418566080",
-        appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
-    };
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp({
+        apiKey: "AIzaSyAcHQjCvkE3YJIeL_mQcbr0a6nG-cC4l_A", authDomain: "animesubstudio-256ec.firebaseapp.com",
+        projectId: "animesubstudio-256ec", storageBucket: "animesubstudio-256ec.firebasestorage.app",
+        messagingSenderId: "439418566080", appId: "1:439418566080:web:6c27313bb4f2e76a2a4425"
+    });
     const db = getFirestore(app);
     let allData = [];
 
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
-        document.getElementById('azGrid').innerHTML += `<button class="az-btn" onclick="filterLetter('${l}', this)">${l}</button>`;
-    });
-
-    async function loadData() {
+    async function load() {
         const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
         allData = snap.docs.map(d => ({id: d.id, ...d.data()}));
         render(allData);
     }
 
-    window.render = (list) => {
-        const grid = document.getElementById('gridDisplay');
-        if(list.length === 0) {
-            grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:3rem; color:var(--text-light);">No Content Found! Admin, add posts from the Admin Panel.</p>';
-            return;
-        }
-        grid.innerHTML = list.map(a => `
-            <div class="anime-card" onclick="location.href='detail.html?id=${a.id}'">
-                <div class="type-tag">${a.type}</div>
-                <img src="${a.image}" alt="${a.name}" loading="lazy">
-                <div class="card-details">
-                    <h3>${a.name}</h3>
-                    <div style="font-size:0.8rem; color:var(--accent); margin-top:0.25rem;">${a.genre}</div>
+    function render(list) {
+        document.getElementById('postGrid').innerHTML = list.map(p => `
+            <div class="card" onclick="location.href='detail.html?id=${p.id}'">
+                <img src="${p.image}" loading="lazy">
+                <div class="card-info">
+                    <h4>${p.name}</h4>
+                    <span class="badge">${p.type}</span>
                 </div>
             </div>
         `).join('');
+    }
+
+    window.filterType = (type, btn) => {
+        document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+        render(type === 'All' ? allData : allData.filter(p => p.type.includes(type)));
     };
 
-    window.filterData = (type, btn) => {
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        render(type === 'All' ? allData : allData.filter(a => a.type === type));
-    };
-
-    window.filterLetter = (l, btn) => {
-        document.querySelectorAll('.az-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if(l === 'All') render(allData);
-        else if(l === '0-9') render(allData.filter(a => /^\d/.test(a.name)));
-        else render(allData.filter(a => a.name.toUpperCase().startsWith(l)));
-    };
-
-    document.getElementById('mainSearch').oninput = (e) => {
+    document.getElementById('searchInput').oninput = (e) => {
         const val = e.target.value.toLowerCase();
-        render(allData.filter(a => a.name.toLowerCase().includes(val) || a.genre.toLowerCase().includes(val)));
+        render(allData.filter(p => p.name.toLowerCase().includes(val) || p.genre.toLowerCase().includes(val)));
     };
-
-    loadData();
+    load();
 </script>
 </body>
 </html>
